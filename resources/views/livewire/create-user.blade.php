@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="py-16 lg:py-28 space-y-12">
     {{-- Page header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
@@ -6,9 +6,9 @@
             <flux:breadcrumbs.item>{{ __('Create User') }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
 
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div>
-                <flux:heading size="xl">{{ __('Create User') }}</flux:heading>
+                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Create User') }}</flux:heading>
                 <flux:subheading>{{ __('Add a new staff member and assign their role.') }}</flux:subheading>
             </div>
             <div class="flex items-center gap-2">
@@ -22,10 +22,10 @@
     <flux:separator />
 
     {{-- Form --}}
-    <form wire:submit.prevent="save" class="space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <form wire:submit.prevent="save" class="space-y-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {{-- Left column: Account Details (2 cols on lg) --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-12">
                 <x-form-card :title="__('Account Details')" :subtitle="__('An invitation email will be sent so they can set their own password.')">
                     <flux:field>
                         <flux:label required>{{ __('Full Name') }}</flux:label>
@@ -54,7 +54,7 @@
             </div>
 
             {{-- Right column: Status & Roles --}}
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-12">
                 {{-- Status card --}}
                 <x-form-card :title="__('Status')" :subtitle="__('Controls sign-in access.')">
                     <flux:switch

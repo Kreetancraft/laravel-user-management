@@ -1,10 +1,15 @@
-<div class="space-y-6">
+<div class="py-16 lg:py-28 space-y-12">
     <flux:breadcrumbs>
         <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
         <flux:breadcrumbs.item>{{ __('Roles') }}</flux:breadcrumbs.item>
     </flux:breadcrumbs>
 
-    <x-page-header :title="__('Roles & Permissions')" :subtitle="__('Define and manage access levels and fine-grained permissions.')" />
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+        <div class="space-y-3">
+            <flux:heading size="2xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Roles & Permissions') }}</flux:heading>
+            <flux:subheading class="leading-6 text-zinc-500 dark:text-zinc-400">{{ __('Define and manage access levels and fine-grained permissions.') }}</flux:subheading>
+        </div>
+    </div>
 
     <div class="flex items-center gap-2 border-b border-border pb-3 mb-6">
         <flux:button size="sm" variant="{{ $tab === 'roles' ? 'filled' : 'ghost' }}" wire:click="setTab('roles')" icon="shield-check">
@@ -38,7 +43,7 @@
                             <flux:table.row :key="$role->id">
                                 <flux:table.cell class="font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:icon icon="shield-check" variant="mini" class="text-zinc-400" />
+                                        <flux:icon icon="shield-check" variant="mini" class="text-zinc-400 dark:text-zinc-500" />
                                         @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
                                         <span>{{ $enum?->label() ?? $role->name }}</span>
                                         @if (in_array($role->name, $systemRoles, true))
@@ -97,7 +102,7 @@
                             <flux:table.row :key="$permission->id">
                                 <flux:table.cell class="font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:icon icon="key" variant="mini" class="text-zinc-400" />
+                                        <flux:icon icon="key" variant="mini" class="text-zinc-400 dark:text-zinc-500" />
                                         <span>{{ $permission->name }}</span>
                                     </div>
                                 </flux:table.cell>
@@ -121,7 +126,7 @@
 
     {{-- Create Permission Modal --}}
     <flux:modal name="create-permission" class="md:w-96">
-        <form wire:submit.prevent="savePermission" class="space-y-6">
+        <form wire:submit.prevent="savePermission" class="space-y-12">
             <div>
                 <flux:heading size="lg">{{ __('Create Permission') }}</flux:heading>
                 <flux:text class="mt-2">{{ __('Specify a unique permission name.') }}</flux:text>
@@ -146,7 +151,7 @@
 
     {{-- Confirm Delete Role Modal --}}
     <flux:modal name="confirm-delete-role" class="md:w-96">
-        <div class="space-y-6">
+        <div class="space-y-12">
             <div>
                 <flux:heading size="lg">{{ __('Delete Role?') }}</flux:heading>
                 <flux:text class="mt-2">
@@ -168,7 +173,7 @@
 
     {{-- Confirm Delete Permission Modal --}}
     <flux:modal name="confirm-delete-permission" class="md:w-96">
-        <div class="space-y-6">
+        <div class="space-y-12">
             <div>
                 <flux:heading size="lg">{{ __('Delete Permission?') }}</flux:heading>
                 <flux:text class="mt-2">

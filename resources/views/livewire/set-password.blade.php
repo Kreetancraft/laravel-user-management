@@ -1,4 +1,4 @@
-<div class="w-full max-w-md space-y-6">
+<div class="w-full max-w-md space-y-12">
         @if ($invalid)
             <flux:card>
                 <div class="p-6 text-center space-y-4">
@@ -14,12 +14,12 @@
             </flux:card>
         @else
             <div class="text-center space-y-2">
-                <flux:heading size="xl">{{ __('Set your password') }}</flux:heading>
+                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Set your password') }}</flux:heading>
                 <flux:subheading>{{ __('Welcome, :name. Choose a password to activate your account.', ['name' => $user->name]) }}</flux:subheading>
             </div>
 
             <flux:card>
-                <form wire:submit.prevent="save" class="p-6 space-y-6">
+                <form wire:submit.prevent="save" class="p-6 space-y-12">
                     <flux:field>
                         <flux:label required>{{ __('Password') }}</flux:label>
                         <flux:input

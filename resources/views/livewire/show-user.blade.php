@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="py-16 lg:py-28 space-y-12">
     {{-- Page Header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
@@ -8,7 +8,7 @@
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <flux:heading size="xl">{{ $user->name }}</flux:heading>
+                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ $user->name }}</flux:heading>
                 <flux:subheading>
                     {{ $user->email }}
                     @if ($user->last_login_at)
@@ -33,9 +33,9 @@
 
     <flux:separator />
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {{-- Left Column: User Profile Summary --}}
-        <div class="lg:col-span-1 space-y-6">
+        <div class="lg:col-span-1 space-y-12">
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs overflow-hidden">
                 <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center space-y-4">
                     <flux:avatar
@@ -94,7 +94,7 @@
         </div>
 
         {{-- Right Column: Login History --}}
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-12">
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
                 <div class="p-6 border-b border-zinc-100 dark:border-zinc-800">
                     <flux:heading size="lg">{{ __('Login History') }}</flux:heading>

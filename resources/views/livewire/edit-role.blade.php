@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="py-16 lg:py-28 space-y-12">
     {{-- Page header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
@@ -6,11 +6,11 @@
             <flux:breadcrumbs.item>{{ __('Edit Role') }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
 
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div>
                 <div class="flex items-center gap-2">
                     @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
-                    <flux:heading size="xl">{{ $enum?->label() ?? $role->name }}</flux:heading>
+                    <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ $enum?->label() ?? $role->name }}</flux:heading>
                     @if ($isSystemRole)
                         <flux:badge size="sm" color="amber" icon="lock-closed">{{ __('System role') }}</flux:badge>
                     @endif
@@ -30,10 +30,10 @@
     <flux:separator />
 
     {{-- Form --}}
-    <form wire:submit.prevent="save" class="space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <form wire:submit.prevent="save" class="space-y-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {{-- Left column: Role Identity --}}
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-12">
                 <flux:card>
                     <div class="p-6 border-b border-zinc-100 dark:border-zinc-800">
                         <flux:heading size="lg">{{ __('Role Identity') }}</flux:heading>
@@ -78,7 +78,7 @@
             </div>
 
             {{-- Right column: Permissions (2 cols on lg) --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-12">
                 <flux:card>
                     <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                         <div>
