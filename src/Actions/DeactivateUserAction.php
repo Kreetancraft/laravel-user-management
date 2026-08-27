@@ -1,0 +1,27 @@
+<?php
+
+namespace Kreetancraft\UserManagement\Actions;
+
+use Kreetancraft\UserManagement\Events\UserDeactivated;
+use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Repositories\UserRepository;
+use Lorisleiva\Actions\Concerns\AsAction;
+
+class DeactivateUserAction
+{
+    use AsAction;
+
+    public function __construct(
+        private UserRepository $users,
+    ) {}
+
+    /**
+     * Deactivate a user and notify them. Sessions are purged by UserObserver.
+     */
+    public function handle(User $user): void
+    {
+        $user->update(['is_active' => false]);
+
+        UserDeactivated::dispatch($user, auth()->user());
+    }
+}

@@ -1,0 +1,65 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "kreetancraft/laravel-user-management",
+    "description": "Complete user management for Laravel — Livewire 4 + Flux UI, Fortify 2FA/passkeys, roles & permissions, impersonation, login history.",
+    "keywords": ["laravel", "livewire", "flux", "user-management", "roles", "permissions", "fortify", "blade"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "kreetancraft",
+            "homepage": "https://github.com/kreetancraft/laravel-user-management"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/kreetancraft/laravel-user-management/issues",
+        "source": "https://github.com/kreetancraft/laravel-user-management",
+        "docs": "https://github.com/kreetancraft/laravel-user-management#readme"
+    },
+    "require": {
+        "php": "^8.2",
+        "lab404/laravel-impersonate": "^1.7",
+        "laravel/framework": "^12.0|^13.0",
+        "laravel/fortify": "^1.37",
+        "livewire/flux": "^2.0",
+        "livewire/livewire": "^4.0",
+        "lorisleiva/laravel-actions": "^2.0",
+        "sandermuller/laravel-fluent-validation": "^1.33",
+        "spatie/laravel-data": "^4.0",
+        "spatie/laravel-permission": "^8.0",
+        "spatie/laravel-query-builder": "^7.0",
+        "torann/geoip": "^3.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.24",
+        "laravel/pint": "^1.27",
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kreetancraft\\UserManagement\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kreetancraft\\UserManagement\\Tests\\": "tests/",
+            "Kreetancraft\\UserManagement\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Kreetancraft\\UserManagement\\Providers\\UserManagementServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
