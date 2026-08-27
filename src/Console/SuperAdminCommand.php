@@ -19,7 +19,10 @@ class SuperAdminCommand extends Command
 
     public function handle(): int
     {
-        $this->prohibit($this->isProductionWithNoForce());
+        if (app()->isProduction() && ! $this->option('force')) {
+            $this->error('Cannot run in production without --force.');
+            return self::FAILURE;
+        }
 
         $registrar = app(PermissionRegistrar::class);
         $roleName = config('user-management.super_admin.role', 'super-admin');
