@@ -10,7 +10,7 @@ use Livewire\WithPagination;
 use Kreetancraft\UserManagement\Actions\CreatePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeletePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeleteRoleAction;
-use Kreetancraft\UserManagement\Enums\UserRole;
+use Kreetancraft\UserManagement\Models\User;
 use RuntimeException;
 use SanderMuller\FluentValidation\FluentRule as Rule;
 use Spatie\Permission\Models\Permission;
@@ -146,7 +146,7 @@ class ManageRoles extends Component
             ->orderBy('name')
             ->paginate(10, ['*'], 'permissionsPage');
 
-        $systemRoles = array_column(UserRole::cases(), 'value');
+        $systemRoles = [User::superAdminRole()];
 
         return view('user-management::livewire.manage-roles', [
             'roles' => $roles,

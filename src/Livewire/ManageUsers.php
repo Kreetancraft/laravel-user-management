@@ -11,8 +11,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Kreetancraft\UserManagement\Actions\DeleteUserAction;
 use Kreetancraft\UserManagement\Contracts\UserContract;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Models\User;
+use Spatie\Permission\Models\Role;
 
 class ManageUsers extends Component
 {
@@ -103,9 +103,11 @@ class ManageUsers extends Component
             15
         );
 
+        $roleOptions = Role::orderBy('name')->pluck('name', 'name')->mapWithKeys(fn ($name) => [$name => str($name)->headline()->toString()])->toArray();
+
         return view('user-management::livewire.manage-users', [
             'users' => $users,
-            'roleOptions' => UserRole::options(),
+            'roleOptions' => $roleOptions,
             'activeCount' => $this->users->activeCount(),
         ])->layout($layout);
     }

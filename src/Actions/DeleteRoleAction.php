@@ -5,7 +5,7 @@ namespace Kreetancraft\UserManagement\Actions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Kreetancraft\UserManagement\Enums\UserRole;
+use Kreetancraft\UserManagement\Models\User;
 use RuntimeException;
 use Spatie\Permission\Models\Role;
 
@@ -44,10 +44,6 @@ class DeleteRoleAction
      */
     private function isSystemRole(Role $role): bool
     {
-        return in_array(
-            $role->name,
-            array_column(UserRole::cases(), 'value'),
-            true,
-        );
+        return $role->name === User::superAdminRole();
     }
 }
