@@ -25,6 +25,12 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Impersonate, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
 
+    /**
+     * Spatie guard - must match Role/Permission guard (web).
+     * Without this, getGuardNames() can return empty on some auth configs.
+     */
+    protected $guard_name = 'web';
+
     protected $hidden = [
         'password',
         'two_factor_secret',
