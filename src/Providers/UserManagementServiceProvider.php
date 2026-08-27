@@ -95,17 +95,29 @@ class UserManagementServiceProvider extends ServiceProvider
 
     /**
      * Super-admins bypass all permission checks.
+     * Works for both package User and host App\User (when it uses HasRoles).
      * Last-super-admin guard lives in DeleteUserAction, not the policy,
      * because Gate::before would otherwise short-circuit it.
      */
     private function registerSuperAdminBypass(): void
     {
         Gate::before(function ($user, $ability) {
-            if (! $user instanceof User || ! $user->isSuperAdmin()) {
+            if (! is_object($user)) {
                 return null;
             }
 
-            return true;
+            // Host App\User or package User both may have isSuperAdmin()
+            if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+                return true;
+            }
+
+            // Fallback: check role directly via HasRoles
+            $superRole = (string) config('user-management.super_admin.role', 'super-admin');
+            if (method_exists($user, 'hasRole') && $user->hasRole($superRole)) {
+                return true;
+            }
+
+            return null;
         });
     }
 
