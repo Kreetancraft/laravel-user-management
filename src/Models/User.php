@@ -23,13 +23,19 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Impersonate, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasFactory;
+    use HasRoles;
+    use Impersonate;
+    use Notifiable;
+    use PasskeyAuthenticatable;
+    use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
     /**
      * Spatie guard - must match Role/Permission guard (web).
      * Without this, getGuardNames() can return empty on some auth configs.
      */
-    protected $guard_name = 'web';
+    protected string $guard_name = 'web';
 
     protected $hidden = [
         'password',

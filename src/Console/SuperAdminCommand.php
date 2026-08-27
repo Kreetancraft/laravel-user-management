@@ -26,8 +26,8 @@ class SuperAdminCommand extends Command
 
         $registrar = app(PermissionRegistrar::class);
         $roleName = config('user-management.super_admin.role', 'super-admin');
-        // Use web guard explicitly — matches User::$guard_name
-        $role = Role::findOrCreate($roleName, 'web');
+        $guard = config('permission.defaults.guard', config('auth.defaults.guard', 'web'));
+        $role = Role::findOrCreate($roleName, $guard);
         $registrar->forgetCachedPermissions();
 
         $userModel = config('auth.providers.users.model', User::class);
