@@ -28,10 +28,10 @@ class InstallCommand extends Command
     private function injectNav(): void
     {
         $candidates = [
+            resource_path('views/layouts/app/sidebar.blade.php'),
             resource_path('views/components/layouts/app/sidebar.blade.php'),
             resource_path('views/components/layouts/app.blade.php'),
             resource_path('views/layouts/app.blade.php'),
-            resource_path('views/layouts/app/sidebar.blade.php'),
             resource_path('views/components/app/sidebar.blade.php'),
         ];
 
