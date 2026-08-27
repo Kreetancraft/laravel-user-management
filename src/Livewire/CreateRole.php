@@ -50,7 +50,7 @@ class CreateRole extends Component
 
         Flux::toast(variant: 'success', text: __('Role created successfully.'));
 
-        $this->redirect(route('admin.roles'), navigate: true);
+        $this->redirect(route(config('user-management.routes.names.roles.index', 'admin.roles')), navigate: true);
     }
 
     #[Title('Create Role - Admin')]

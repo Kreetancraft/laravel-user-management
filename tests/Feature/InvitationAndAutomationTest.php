@@ -183,7 +183,7 @@ test('a deactivated user is redirected to login on the next request', function (
     $user = User::factory()->inactive()->create();
     $this->actingAs($user);
 
-    $this->get(route('admin.users'))->assertRedirect(route('login'));
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertRedirect(route(config('user-management.routes.names.login', 'login')));
 });
 
 test('a user with enforce_2fa but no 2FA enrolled is blocked by the gate', function () {
@@ -193,7 +193,7 @@ test('a user with enforce_2fa but no 2FA enrolled is blocked by the gate', funct
     $user->assignRole($role);
     $this->actingAs($user);
 
-    $this->get(route('admin.users'))
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))
         ->assertRedirect(route('security.edit'));
 });
 
@@ -204,7 +204,7 @@ test('a user with enforce_2fa and 2FA enrolled passes the gate', function () {
     $user->assignRole($role);
     $this->actingAs($user);
 
-    $this->get(route('admin.users'))->assertOk();
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertOk();
 });
 
 // -------------------------------------------------------------------

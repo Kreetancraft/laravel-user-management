@@ -99,7 +99,7 @@ class EditUser extends Component
 
         Flux::toast(variant: 'success', text: __('User updated successfully.'));
 
-        $this->redirect(route('admin.users'), navigate: true);
+        $this->redirect(route(config('user-management.routes.names.users.index', 'admin.users')), navigate: true);
     }
 
     #[Title('Edit User - Admin')]

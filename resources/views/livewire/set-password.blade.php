@@ -7,7 +7,7 @@
                     <flux:text class="text-zinc-500 dark:text-zinc-400">
                         {{ __('This invitation link is invalid or has expired. Please ask an administrator to send a new one.') }}
                     </flux:text>
-                    <flux:button href="{{ route('login') }}" variant="primary" wire:navigate>
+                    <flux:button href="{{ route(config('user-management.routes.names.login', 'login')) }}" variant="primary" wire:navigate>
                         {{ __('Back to Sign In') }}
                     </flux:button>
                 </div>

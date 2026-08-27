@@ -70,7 +70,7 @@ class CreateUser extends Component
 
         Flux::toast(variant: 'success', text: __('Invitation sent to :email.', ['email' => $validated['email']]));
 
-        $this->redirect(route('admin.users'), navigate: true);
+        $this->redirect(route(config('user-management.routes.names.users.index', 'admin.users')), navigate: true);
     }
 
     #[Title('Create User - Admin')]

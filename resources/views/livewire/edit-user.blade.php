@@ -2,14 +2,14 @@
     {{-- Page header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.users') }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
             <flux:breadcrumbs.item>{{ __('Edit User') }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-                <flux:heading size="xl">{{ $user->name }}</flux:heading>
-                <flux:subheading>
+                <flux:heading size="xl" class="leading-7 tracking-tight">{{ $user->name }}</flux:heading>
+                <flux:subheading class="leading-6">
                     {{ $user->email }}
                     @if ($user->last_login_at)
                         · {{ __('Last seen') }} {{ $user->last_login_at->diffForHumans() }}
@@ -19,7 +19,7 @@
                 </flux:subheading>
             </div>
             <div class="flex items-center gap-2">
-                <flux:button href="{{ route('admin.users') }}" variant="ghost" wire:navigate>
+                <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
                     {{ __('Cancel') }}
                 </flux:button>
             </div>
@@ -36,8 +36,8 @@
             {{-- Left column: Account Details --}}
             <div class="lg:col-span-2 space-y-6">
                 <x-form-card :title="__('Account Details')" :subtitle="__('Basic information used to sign in.')">
-                    <flux:field>
-                        <flux:label required>{{ __('Full Name') }}</flux:label>
+                    <flux:field class="leading-6">
+                        <flux:label required class="leading-6">{{ __('Full Name') }}</flux:label>
                         <flux:input
                             wire:model.blur="name"
                             icon="user"
@@ -46,8 +46,8 @@
                         <flux:error name="name" />
                     </flux:field>
 
-                    <flux:field>
-                        <flux:label required>{{ __('Email Address') }}</flux:label>
+                    <flux:field class="leading-6">
+                        <flux:label required class="leading-6">{{ __('Email Address') }}</flux:label>
                         <flux:input
                             wire:model.blur="email"
                             type="email"
@@ -57,8 +57,8 @@
                         <flux:error name="email" />
                     </flux:field>
 
-                    <flux:field>
-                        <flux:label>{{ __('New Password') }}</flux:label>
+                    <flux:field class="leading-6">
+                        <flux:label class="leading-6">{{ __('New Password') }}</flux:label>
                         <flux:input
                             wire:model.blur="password"
                             type="password"
@@ -109,7 +109,7 @@
                         <flux:checkbox value="{{ $role->name }}" class="mt-0.5" />
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <flux:text class="font-medium text-content">
+                                <flux:text class="font-medium leading-6 text-content">
                                     {{ $enum?->label() ?? $role->name }}
                                 </flux:text>
                                 @if ($enum)
@@ -117,7 +117,7 @@
                                 @endif
                             </div>
                             @if ($enum?->description())
-                                <flux:text class="text-xs text-content-muted mt-1 block">
+                                <flux:text class="text-xs leading-5 text-content-muted mt-1 block">
                                     {{ $enum->description() }}
                                 </flux:text>
                             @endif
@@ -129,7 +129,7 @@
 
         {{-- Form footer actions --}}
         <div class="flex items-center justify-end gap-2 pt-2">
-            <flux:button href="{{ route('admin.users') }}" variant="ghost" wire:navigate>
+            <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
                 {{ __('Cancel') }}
             </flux:button>
             <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled" wire:target="save" data-test="edit-user-submit">

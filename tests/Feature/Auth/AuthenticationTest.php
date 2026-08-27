@@ -4,7 +4,7 @@ use Laravel\Fortify\Features;
 use Kreetancraft\UserManagement\Models\User;
 
 test('login screen can be rendered', function () {
-    $response = $this->get(route('login'));
+    $response = $this->get(route(config('user-management.routes.names.login', 'login')));
 
     $response->assertOk();
 });

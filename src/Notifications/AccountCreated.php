@@ -30,7 +30,7 @@ class AccountCreated extends Notification implements ShouldQueue
             ->subject(__('Welcome to :app — Your account is active', ['app' => config('app.name')]))
             ->greeting(__('Hello :name!', ['name' => $this->user->name]))
             ->line(__('Your account has been activated and is ready to use.'))
-            ->action(__('Sign In'), route('login'))
+            ->action(__('Sign In'), route(config('user-management.routes.names.login', 'login')))
             ->line(__('For security, consider enabling two-factor authentication under Settings > Security.'));
     }
 }

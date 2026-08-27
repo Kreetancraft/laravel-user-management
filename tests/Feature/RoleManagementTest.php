@@ -17,19 +17,19 @@ beforeEach(function () {
 // -------------------------------------------------------------------
 
 test('guests are redirected to login on role index', function () {
-    $this->get(route('admin.roles'))->assertRedirect(route('login'));
+    $this->get(route(config('user-management.routes.names.roles.index', 'admin.roles')))->assertRedirect(route(config('user-management.routes.names.login', 'login')));
 });
 
 test('users without manage-roles permission are forbidden', function () {
     actingAsRole(UserRole::BookingManager);
 
-    $this->get(route('admin.roles'))->assertForbidden();
+    $this->get(route(config('user-management.routes.names.roles.index', 'admin.roles')))->assertForbidden();
 });
 
 test('super admin can view the roles index', function () {
     actingAsSuperAdmin();
 
-    $this->get(route('admin.roles'))
+    $this->get(route(config('user-management.routes.names.roles.index', 'admin.roles')))
         ->assertOk()
         ->assertSeeLivewire(ManageRoles::class);
 });
@@ -46,7 +46,7 @@ test('super admin creates a role with permissions', function () {
         ->set('selectedPermissions', ['view-trips', 'edit-trips'])
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('admin.roles'));
+        ->assertRedirect(route(config('user-management.routes.names.roles.index', 'admin.roles')));
 
     $role = Role::findByName('content-editor');
     expect($role->hasPermissionTo('view-trips'))->toBeTrue()

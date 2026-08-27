@@ -44,8 +44,24 @@ return [
     'routes' => [
         'prefix' => 'admin',
         'middleware' => ['web', 'auth', 'verified', 'ensure.2fa.enforced'],
-        'home' => '/', // used for route('admin') fallback, override to your dashboard
+        'home' => '/', // used for config('user-management.routes.home', '/') fallback, override to your dashboard
         'security_edit' => null, // optional link to security settings page
+        'names' => [
+            'dashboard' => 'dashboard',
+            'users' => [
+                'index' => 'admin.users',
+                'create' => 'admin.users.create',
+                'show' => 'admin.users.show',
+                'edit' => 'admin.users.edit',
+            ],
+            'roles' => [
+                'index' => 'admin.roles',
+                'create' => 'admin.roles.create',
+                'edit' => 'admin.roles.edit',
+            ],
+            'invitation' => 'user.invitation.set-password',
+            'login' => 'login',
+        ],
     ],
 
     /*

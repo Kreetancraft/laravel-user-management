@@ -2,7 +2,7 @@
     {{-- Page header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.users') }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
             <flux:breadcrumbs.item>{{ __('Create User') }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
 
@@ -12,7 +12,7 @@
                 <flux:subheading>{{ __('Add a new staff member and assign their role.') }}</flux:subheading>
             </div>
             <div class="flex items-center gap-2">
-                <flux:button href="{{ route('admin.users') }}" variant="ghost" wire:navigate>
+                <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
                     {{ __('Cancel') }}
                 </flux:button>
             </div>
@@ -100,7 +100,7 @@
 
         {{-- Form footer actions --}}
         <div class="flex items-center justify-end gap-2 pt-2">
-            <flux:button href="{{ route('admin.users') }}" variant="ghost" wire:navigate>
+            <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
                 {{ __('Cancel') }}
             </flux:button>
             <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled" wire:target="save" data-test="create-user-submit">

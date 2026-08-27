@@ -40,7 +40,7 @@ class UserAccountCreated extends Mailable implements ShouldQueue
             view: 'user-management::emails.user-account-created',
             with: [
                 'user' => $this->user,
-                'loginUrl' => route('login'),
+                'loginUrl' => route(config('user-management.routes.names.login', 'login')),
             ],
         );
     }

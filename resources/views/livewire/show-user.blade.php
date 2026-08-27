@@ -2,7 +2,7 @@
     {{-- Page Header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route('admin.users') }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
             <flux:breadcrumbs.item>{{ __('User Details') }}</flux:breadcrumbs.item>
         </flux:breadcrumbs>
 
@@ -19,11 +19,11 @@
                 </flux:subheading>
             </div>
             <div class="flex items-center gap-2">
-                <flux:button href="{{ route('admin.users') }}" variant="ghost" wire:navigate icon="chevron-left">
+                <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate icon="chevron-left">
                     {{ __('Back') }}
                 </flux:button>
                 @can('update', $user)
-                    <flux:button href="{{ route('admin.users.edit', $user) }}" variant="primary" icon="pencil" wire:navigate>
+                    <flux:button href="{{ route(config('user-management.routes.names.users.edit', 'admin.users.edit'), $user) }}" variant="primary" icon="pencil" wire:navigate>
                         {{ __('Edit User') }}
                     </flux:button>
                 @endcan

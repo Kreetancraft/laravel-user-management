@@ -21,7 +21,7 @@
                     <div class="w-full sm:w-72">
                         <flux:input wire:model.live.debounce.300ms="searchRoles" placeholder="{{ __('Search roles...') }}" icon="magnifying-glass" />
                     </div>
-                    <flux:button href="{{ route('admin.roles.create') }}" icon="plus" variant="primary" wire:navigate>
+                    <flux:button href="{{ route(config('user-management.routes.names.roles.create', 'admin.roles.create')) }}" icon="plus" variant="primary" wire:navigate>
                         {{ __('Create Role') }}
                     </flux:button>
                 </div>
@@ -57,7 +57,7 @@
                                 </flux:table.cell>
                                 <flux:table.cell>
                                     <div class="flex items-center gap-2">
-                                        <flux:button href="{{ route('admin.roles.edit', $role) }}" variant="ghost" size="sm" icon="pencil" wire:navigate />
+                                        <flux:button href="{{ route(config('user-management.routes.names.roles.edit', 'admin.roles.edit'), $role) }}" variant="ghost" size="sm" icon="pencil" wire:navigate />
 
                                         @unless (in_array($role->name, $systemRoles, true))
                                             <flux:button

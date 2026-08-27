@@ -10,7 +10,7 @@ beforeEach(function () {
 test('two factor challenge redirects to login when not authenticated', function () {
     $response = $this->get(route('two-factor.login'));
 
-    $response->assertRedirect(route('login'));
+    $response->assertRedirect(route(config('user-management.routes.names.login', 'login')));
 });
 
 test('two factor challenge can be rendered', function () {

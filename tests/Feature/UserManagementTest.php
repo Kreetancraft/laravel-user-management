@@ -17,20 +17,20 @@ beforeEach(function () {
 // -------------------------------------------------------------------
 
 test('guests are redirected to login', function () {
-    $this->get(route('admin.users'))->assertRedirect(route('login'));
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertRedirect(route(config('user-management.routes.names.login', 'login')));
 });
 
 test('users without view-users permission are forbidden', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $this->get(route('admin.users'))->assertForbidden();
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertForbidden();
 });
 
 test('super admin can view the user index', function () {
     actingAsSuperAdmin();
 
-    $this->get(route('admin.users'))
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))
         ->assertOk()
         ->assertSeeLivewire(ManageUsers::class);
 });
@@ -38,7 +38,7 @@ test('super admin can view the user index', function () {
 test('booking manager cannot view the user index', function () {
     actingAsRole(UserRole::BookingManager);
 
-    $this->get(route('admin.users'))->assertForbidden();
+    $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertForbidden();
 });
 
 // -------------------------------------------------------------------
@@ -54,7 +54,7 @@ test('super admin creates a user via livewire component', function () {
         ->set('selectedRoles', [UserRole::BookingManager->value])
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('admin.users'));
+        ->assertRedirect(route(config('user-management.routes.names.users.index', 'admin.users')));
 
     $this->assertDatabaseHas('users', [
         'name' => 'Jane Doe',
@@ -136,7 +136,7 @@ test('edit user updates details and roles', function () {
         ->set('selectedRoles', [UserRole::PackageManager->value])
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('admin.users'));
+        ->assertRedirect(route(config('user-management.routes.names.users.index', 'admin.users')));
 
     $target->refresh();
     expect($target->name)->toBe('Updated Name')

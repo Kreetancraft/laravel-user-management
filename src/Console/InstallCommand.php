@@ -62,7 +62,7 @@ class InstallCommand extends Command
 
         $content = File::get($sidebar);
 
-        if (str_contains($content, 'user-management::nav') || str_contains($content, "route('admin.users')")) {
+        if (str_contains($content, 'user-management::nav') || str_contains($content, "route(config('user-management.routes.names.users.index', 'admin.users'))")) {
             $this->line('Sidebar already contains user-management nav — skipping.');
             return;
         }
@@ -70,7 +70,7 @@ class InstallCommand extends Command
         // Try to inject after Dashboard item, else before </flux:navlist.group>, else append
         $navSnippet = "        <x-user-management::nav />\n";
 
-        if (str_contains($content, "route('dashboard')")) {
+        if (str_contains($content, "route(config('user-management.routes.names.dashboard', 'dashboard'))")) {
             $content = preg_replace(
                 "/(route\('dashboard'\).*?wire:navigate.*?\n.*?\@?\<\/flux:navlist\.item\>)/s",
                 "$1\n".$navSnippet,
@@ -102,7 +102,7 @@ class InstallCommand extends Command
                 continue;
             }
             $content = File::get($path);
-            if (str_contains($content, "route('dashboard')") || str_contains($content, 'Dashboard')) {
+            if (str_contains($content, "route(config('user-management.routes.names.dashboard', 'dashboard'))") || str_contains($content, 'Dashboard')) {
                 // Prefer files that look like a layout/sidebar
                 if (str_contains($path, 'sidebar') || str_contains($path, 'layout')) {
                     return $path;

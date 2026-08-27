@@ -21,7 +21,7 @@ class EnsureUserIsActive
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
+            return redirect()->route(config('user-management.routes.names.login', 'login'))->withErrors([
                 'email' => __('Your account has been deactivated. Please contact an administrator.'),
             ]);
         }

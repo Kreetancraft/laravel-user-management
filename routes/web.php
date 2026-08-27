@@ -12,8 +12,10 @@ use Kreetancraft\UserManagement\Livewire\ShowUser;
 
 // Public: complete an invitation by setting your own password.
 Route::middleware('throttle:6,1')->group(function () {
+    $invitationRoute = config('user-management.routes.names.invitation', 'user.invitation.set-password');
+
     Route::get('set-password/{token}', SetPassword::class)
-        ->name('user.invitation.set-password');
+        ->name($invitationRoute);
 });
 
 // Admin impersonation (super-admins only, gated in the User model). Hard dependency.
@@ -25,26 +27,27 @@ if (method_exists(\Illuminate\Support\Facades\Route::class, 'impersonate') || \I
 
 $prefix = config('user-management.routes.prefix', 'admin');
 $middleware = config('user-management.routes.middleware', ['auth', 'verified', 'ensure.2fa.enforced']);
+$names = config('user-management.routes.names', []);
 
-Route::middleware($middleware)->prefix($prefix)->group(function () {
+Route::middleware($middleware)->prefix($prefix)->group(function () use ($names) {
     // Users
-    Route::middleware('can:create-users')->group(function () {
-        Route::get('users/create', CreateUser::class)->name('admin.users.create');
+    Route::middleware('can:create-users')->group(function () use ($names) {
+        Route::get('users/create', CreateUser::class)->name($names['users']['create'] ?? 'admin.users.create');
     });
 
-    Route::middleware('can:view-users')->group(function () {
-        Route::get('users', ManageUsers::class)->name('admin.users');
-        Route::get('users/{user}', ShowUser::class)->name('admin.users.show');
+    Route::middleware('can:view-users')->group(function () use ($names) {
+        Route::get('users', ManageUsers::class)->name($names['users']['index'] ?? 'admin.users');
+        Route::get('users/{user}', ShowUser::class)->name($names['users']['show'] ?? 'admin.users.show');
     });
 
-    Route::middleware('can:edit-users')->group(function () {
-        Route::get('users/{user}/edit', EditUser::class)->name('admin.users.edit');
+    Route::middleware('can:edit-users')->group(function () use ($names) {
+        Route::get('users/{user}/edit', EditUser::class)->name($names['users']['edit'] ?? 'admin.users.edit');
     });
 
     // Roles
-    Route::middleware('can:manage-roles')->group(function () {
-        Route::get('roles', ManageRoles::class)->name('admin.roles');
-        Route::get('roles/create', CreateRole::class)->name('admin.roles.create');
-        Route::get('roles/{role}/edit', EditRole::class)->name('admin.roles.edit');
+    Route::middleware('can:manage-roles')->group(function () use ($names) {
+        Route::get('roles', ManageRoles::class)->name($names['roles']['index'] ?? 'admin.roles');
+        Route::get('roles/create', CreateRole::class)->name($names['roles']['create'] ?? 'admin.roles.create');
+        Route::get('roles/{role}/edit', EditRole::class)->name($names['roles']['edit'] ?? 'admin.roles.edit');
     });
 });

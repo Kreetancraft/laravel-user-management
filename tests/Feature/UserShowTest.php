@@ -13,7 +13,7 @@ beforeEach(function () {
 
 test('guest is redirected to login', function () {
     $user = User::factory()->create();
-    $this->get(route('admin.users.show', $user))->assertRedirect(route('login'));
+    $this->get(route(config('user-management.routes.names.users.show', 'admin.users.show'), $user))->assertRedirect(route(config('user-management.routes.names.login', 'login')));
 });
 
 test('user without view-users permission is forbidden', function () {
@@ -21,14 +21,14 @@ test('user without view-users permission is forbidden', function () {
     $target = User::factory()->create();
     $this->actingAs($user);
 
-    $this->get(route('admin.users.show', $target))->assertForbidden();
+    $this->get(route(config('user-management.routes.names.users.show', 'admin.users.show'), $target))->assertForbidden();
 });
 
 test('super admin can view user details', function () {
     actingAsSuperAdmin();
     $target = User::factory()->create();
 
-    $this->get(route('admin.users.show', $target))
+    $this->get(route(config('user-management.routes.names.users.show', 'admin.users.show'), $target))
         ->assertOk()
         ->assertSeeLivewire(ShowUser::class);
 });

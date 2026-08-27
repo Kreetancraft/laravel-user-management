@@ -70,7 +70,7 @@ class SetPassword extends Component
 
         Flux::toast(variant: 'success', text: __('Your password has been set. You can now sign in.'));
 
-        $this->redirect(route('login'), navigate: true);
+        $this->redirect(route(config('user-management.routes.names.login', 'login')), navigate: true);
     }
 
     #[Title('Set Your Password')]
