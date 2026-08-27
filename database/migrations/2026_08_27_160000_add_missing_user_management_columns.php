@@ -36,12 +36,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'deleted_at')) {
-                $table->dropSoftDeletes();
-            }
-            $cols = array_filter(['is_active', 'last_login_at', 'last_login_ip'], fn ($c) => Schema::hasColumn('users', $c));
+            $cols = array_filter(
+                ['invitation_token', 'invitation_sent_at', 'enforce_2fa', 'is_active', 'last_login_at', 'last_login_ip'],
+                fn ($c) => Schema::hasColumn('users', $c)
+            );
             if ($cols) {
                 $table->dropColumn($cols);
+            }
+            if (Schema::hasColumn('users', 'deleted_at')) {
+                $table->dropSoftDeletes();
             }
         });
     }
