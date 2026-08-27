@@ -26,15 +26,17 @@ class SuperAdminCommand extends Command
 
         $registrar = app(PermissionRegistrar::class);
         $roleName = config('user-management.super_admin.role', 'super-admin');
+        // Use web guard explicitly — matches User::$guard_name
         $role = Role::findOrCreate($roleName, 'web');
         $registrar->forgetCachedPermissions();
 
+        $userModel = config('auth.providers.users.model', User::class);
         $userOption = $this->option('user');
 
         if ($userOption) {
             $user = is_numeric($userOption)
-                ? User::find($userOption)
-                : User::where('email', $userOption)->first();
+                ? $userModel::find($userOption)
+                : $userModel::where('email', $userOption)->first();
 
             if (! $user) {
                 $this->error("User [{$userOption}] not found.");
@@ -50,7 +52,8 @@ class SuperAdminCommand extends Command
         $email = text('Email', default: config('user-management.super_admin.email', 'superadmin@example.com'), required: true, validate: fn ($v) => filter_var($v, FILTER_VALIDATE_EMAIL) ? null : 'Invalid email');
         $pwd = promptPassword('Password', required: true);
 
-        $user = User::firstOrCreate(
+        $userModel = config('auth.providers.users.model', User::class);
+        $user = $userModel::firstOrCreate(
             ['email' => $email],
             [
                 'name' => $name,
