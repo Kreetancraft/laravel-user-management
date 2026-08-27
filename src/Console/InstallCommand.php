@@ -27,10 +27,36 @@ class InstallCommand extends Command
 
     private function injectNav(): void
     {
-        $sidebar = resource_path('views/components/layouts/app/sidebar.blade.php');
+        $candidates = [
+            resource_path('views/components/layouts/app/sidebar.blade.php'),
+            resource_path('views/components/layouts/app.blade.php'),
+            resource_path('views/layouts/app.blade.php'),
+            resource_path('views/layouts/app/sidebar.blade.php'),
+            resource_path('views/components/app/sidebar.blade.php'),
+        ];
 
-        if (! File::exists($sidebar)) {
-            $this->warn("Sidebar not found at {$sidebar} — skipping auto-inject. Add <x-user-management::nav /> manually.");
+        $sidebar = null;
+        foreach ($candidates as $path) {
+            if (File::exists($path)) {
+                $sidebar = $path;
+                break;
+            }
+        }
+
+        // Fallback: search any blade containing Dashboard in views
+        if (! $sidebar) {
+            $found = $this->findSidebarByContent();
+            if ($found) {
+                $sidebar = $found;
+            }
+        }
+
+        if (! $sidebar || ! File::exists($sidebar)) {
+            $this->warn("Sidebar not found — skipping auto-inject. Add <x-user-management::nav /> manually to your layout.");
+            $this->line("Tried: ".implode(', ', $candidates));
+            if ($found = $this->findSidebarByContent()) {
+                $this->line("Found candidate: {$found}");
+            }
             return;
         }
 
@@ -58,6 +84,31 @@ class InstallCommand extends Command
         }
 
         File::put($sidebar, $content);
-        $this->info('Injected <x-user-management::nav /> into sidebar.');
+        $this->info("Injected <x-user-management::nav /> into {$sidebar}.");
+    }
+
+    private function findSidebarByContent(): ?string
+    {
+        $views = resource_path('views');
+        if (! File::isDirectory($views)) {
+            return null;
+        }
+        foreach (File::allFiles($views) as $file) {
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+            $path = $file->getPathname();
+            if (! str_ends_with($path, '.blade.php')) {
+                continue;
+            }
+            $content = File::get($path);
+            if (str_contains($content, "route('dashboard')") || str_contains($content, 'Dashboard')) {
+                // Prefer files that look like a layout/sidebar
+                if (str_contains($path, 'sidebar') || str_contains($path, 'layout')) {
+                    return $path;
+                }
+            }
+        }
+        return null;
     }
 }
