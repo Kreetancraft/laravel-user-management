@@ -65,6 +65,7 @@ class UserManagementServiceProvider extends ServiceProvider
         ], 'user-management-views');
 
         Blade::componentNamespace('Kreetancraft\UserManagement\\View\\Components', 'user-management');
+        Blade::anonymousComponentPath(__DIR__.'/../../resources/views/components', 'user-management');
     }
 
     protected function registerMigrations(): void
@@ -114,6 +115,7 @@ class UserManagementServiceProvider extends ServiceProvider
             $this->commands([
                 \Kreetancraft\UserManagement\Console\SuperAdminCommand::class,
                 \Kreetancraft\UserManagement\Console\SyncPermissionsCommand::class,
+                \Kreetancraft\UserManagement\Console\InstallCommand::class,
             ]);
         }
     }
