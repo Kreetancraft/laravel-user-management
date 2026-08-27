@@ -135,7 +135,7 @@ class ManageRoles extends Component
     #[Title('Roles & Permissions - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'user-management::layouts.app');
+        $layout = config('user-management.layouts.admin', 'layouts.app');
 
         $roles = Role::with('permissions')
             ->where('name', 'like', '%'.$this->searchRoles.'%')

@@ -36,6 +36,6 @@ class ShowUser extends Component
 
         return view('user-management::livewire.show-user', [
             'history' => $history,
-        ])->layout(config('user-management.layouts.admin', 'user-management::layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
     }
 }

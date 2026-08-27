@@ -107,6 +107,6 @@ class EditUser extends Component
     {
         return view('user-management::livewire.edit-user', [
             'roles' => $this->availableRoles(),
-        ])->layout(config('user-management.layouts.admin', 'user-management::layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
     }
 }

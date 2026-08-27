@@ -73,7 +73,7 @@ class EditRole extends Component
         return view('user-management::livewire.edit-role', [
             'permissions' => Permission::orderBy('name')->get(),
             'isSystemRole' => $this->isSystemRole(),
-        ])->layout(config('user-management.layouts.admin', 'user-management::layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
     }
 
     private function isSystemRole(): bool

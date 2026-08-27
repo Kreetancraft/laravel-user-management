@@ -73,7 +73,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'layouts' => [
-        'admin' => 'user-management::layouts.app',
+        'admin' => 'layouts.app',
         'auth' => 'user-management::layouts.auth',
     ],
 

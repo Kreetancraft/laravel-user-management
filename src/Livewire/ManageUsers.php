@@ -93,7 +93,7 @@ class ManageUsers extends Component
     #[Title('User Management - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'user-management::layouts.app');
+        $layout = config('user-management.layouts.admin', 'layouts.app');
 
         $users = $this->users->paginated(
             $this->search,
