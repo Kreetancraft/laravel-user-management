@@ -1,4 +1,4 @@
-<div class="py-16 lg:py-28 space-y-12">
+<div class="space-y-8">
     <flux:breadcrumbs>
         <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
         <flux:breadcrumbs.item>{{ __('Roles') }}</flux:breadcrumbs.item>

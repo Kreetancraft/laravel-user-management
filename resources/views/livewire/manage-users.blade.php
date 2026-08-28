@@ -1,4 +1,4 @@
-<div class="py-16 lg:py-28 space-y-12">
+<div class="space-y-8">
     {{-- Breadcrumbs — subtle, 60 points --}}
     <flux:breadcrumbs class="leading-6">
         <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
@@ -153,15 +153,11 @@
                     @endforeach
                 </flux:table.rows>
             </flux:table>
-
-            <div class="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
-                <flux:text class="text-sm leading-6 text-zinc-900 dark:text-zinc-100/60">{{ __('Showing :from to :to of :total results', ['from' => $users->firstItem(), 'to' => $users->lastItem(), 'total' => $users->total()]) }}</flux:text>
-            </div>
         </div>
     @endif
 
     <flux:modal name="confirm-delete-user" class="md:w-96">
-        <div class="space-y-12 p-2">
+        <div class="space-y-6 p-2">
             <flux:heading size="lg" class="leading-7 text-zinc-900 dark:text-zinc-100">{{ __('Delete User?') }}</flux:heading>
             <flux:text class="leading-6 text-zinc-900 dark:text-zinc-100/60">{{ __('This action cannot be undone. The user will be permanently removed from the system.') }}</flux:text>
             <div class="flex gap-3 justify-end">

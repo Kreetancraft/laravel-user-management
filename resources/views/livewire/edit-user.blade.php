@@ -1,4 +1,4 @@
-<div class="py-16 lg:py-28 space-y-12">
+<div class="space-y-8">
     {{-- Breadcrumbs — 60 points --}}
     <flux:breadcrumbs class="leading-6">
         <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>

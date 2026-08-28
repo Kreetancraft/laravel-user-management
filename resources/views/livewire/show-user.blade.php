@@ -1,4 +1,4 @@
-<div class="py-16 lg:py-28 space-y-12">
+<div class="space-y-8">
     {{-- Page Header --}}
     <div class="space-y-3">
         <flux:breadcrumbs>
