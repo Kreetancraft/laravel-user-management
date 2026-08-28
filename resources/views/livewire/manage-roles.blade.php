@@ -10,6 +10,17 @@
             </flux:breadcrumbs>
         </x-slot:breadcrumbs>
 
+        {{-- Same count chips the users index carries, so the two pages read as
+             one product rather than two. --}}
+        <x-slot:meta>
+            <flux:badge size="sm" color="zinc" icon="shield-check" class="tabular-nums">
+                {{ trans_choice('{0}No roles|{1}:count role|[2,*]:count roles', $roles->total(), ['count' => $roles->total()]) }}
+            </flux:badge>
+            <flux:badge size="sm" color="zinc" icon="key" class="tabular-nums">
+                {{ trans_choice('{0}No permissions|{1}:count permission|[2,*]:count permissions', $permissions->total(), ['count' => $permissions->total()]) }}
+            </flux:badge>
+        </x-slot:meta>
+
         <x-slot:actions>
             @if ($tab === 'roles')
                 <flux:button
@@ -26,8 +37,10 @@
         </x-slot:actions>
     </x-user-management::page-header>
 
+    <flux:separator variant="subtle" />
+
     {{-- Two datasets, one screen: tabs rather than stacking both. --}}
-    <div class="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-700">
+    <div class="flex items-center gap-1">
         <flux:button
             size="sm"
             :variant="$tab === 'roles' ? 'filled' : 'ghost'"
@@ -52,7 +65,13 @@
                 class="sm:max-w-xs"
             />
 
-            <div wire:loading.class="opacity-50" wire:target="searchRoles, setTab">
+            <div wire:loading.delay wire:target="searchRoles, setTab">
+                <flux:card>
+                    <x-user-management::table-skeleton :rows="4" :columns="3" />
+                </flux:card>
+            </div>
+
+            <div wire:loading.remove.delay wire:target="searchRoles, setTab">
                 @if ($roles->isEmpty())
                     <flux:card>
                         <x-user-management::empty-state
@@ -132,7 +151,13 @@
                 class="sm:max-w-xs"
             />
 
-            <div wire:loading.class="opacity-50" wire:target="searchPermissions, setTab">
+            <div wire:loading.delay wire:target="searchPermissions, setTab">
+                <flux:card>
+                    <x-user-management::table-skeleton :rows="4" :columns="2" />
+                </flux:card>
+            </div>
+
+            <div wire:loading.remove.delay wire:target="searchPermissions, setTab">
                 @if ($permissions->isEmpty())
                     <flux:card>
                         <x-user-management::empty-state

@@ -17,6 +17,8 @@
             :description="__('Welcome, :name. This is the last step.', ['name' => $user->name])"
         />
 
+        <x-user-management::form-errors />
+
         <form wire:submit.prevent="save" class="flex flex-col gap-5">
             <flux:field>
                 <flux:label>{{ __('Password') }}</flux:label>

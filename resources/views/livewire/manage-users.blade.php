@@ -70,6 +70,13 @@
         @endif
     </div>
 
+    <div wire:loading.delay wire:target="search, roleFilter, statusFilter, sort">
+        <flux:card>
+            <x-user-management::table-skeleton :rows="5" :columns="5" />
+        </flux:card>
+    </div>
+
+    <div wire:loading.remove.delay wire:target="search, roleFilter, statusFilter, sort">
     @if ($users->isEmpty())
         <flux:card>
             <x-user-management::empty-state
@@ -194,6 +201,8 @@
             </flux:table.rows>
         </flux:table>
     @endif
+
+    </div>
 
     <flux:modal name="confirm-delete-user" class="md:w-96">
         <div class="space-y-6">

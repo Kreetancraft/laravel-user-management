@@ -13,6 +13,8 @@
 
     <flux:separator variant="subtle" />
 
+    <x-user-management::form-errors />
+
     <form wire:submit.prevent="save" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {{-- The form is the protagonist: it gets two thirds and the focus. --}}

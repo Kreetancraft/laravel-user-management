@@ -20,66 +20,43 @@
 
     <flux:separator variant="subtle" />
 
+    <x-user-management::form-errors />
+
     <form wire:submit.prevent="save" class="space-y-6">
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div>
-                <x-user-management::form-section :title="__('Name')">
-                    <flux:field>
-                        <flux:label>{{ __('Role name') }}</flux:label>
-                        <flux:input wire:model.blur="name" :disabled="$isSystemRole" />
+        <x-user-management::form-section :title="__('Name')">
+            <flux:field>
+                <flux:label>{{ __('Role name') }}</flux:label>
+                <flux:input wire:model.blur="name" :disabled="$isSystemRole" class="sm:max-w-md" />
 
-                        @if ($isSystemRole)
-                            {{-- Say it once, where the disabled field is — not in a
-                                 separate callout repeating the same fact. --}}
-                            <flux:description>
-                                {{ __('Built in. The name is locked and the role cannot be deleted, but its permissions are yours to change.') }}
-                            </flux:description>
-                        @else
-                            <flux:description>{{ __('Lowercase and hyphenated.') }}</flux:description>
-                        @endif
+                @if ($isSystemRole)
+                    {{-- Say it once, next to the disabled field — not again in a
+                         separate callout repeating the same fact. --}}
+                    <flux:description>
+                        {{ __('Built in. The name is locked and the role cannot be deleted, but its permissions are yours to change.') }}
+                    </flux:description>
+                @else
+                    <flux:description>{{ __('Lowercase and hyphenated.') }}</flux:description>
+                @endif
 
-                        <flux:error name="name" />
-                    </flux:field>
-                </x-user-management::form-section>
-            </div>
+                <flux:error name="name" />
+            </flux:field>
+        </x-user-management::form-section>
 
-            <div class="lg:col-span-2">
-                <x-user-management::form-section :title="__('Permissions')">
-                    <x-slot:subtitle>
-                        {{ trans_choice('{0}Nothing selected|{1}:count of :total selected|[2,*]:count of :total selected', count($selectedPermissions), ['count' => count($selectedPermissions), 'total' => $permissions->count()]) }}
-                    </x-slot:subtitle>
-
-                    @if ($permissions->isEmpty())
-                        <x-user-management::empty-state
-                            icon="key"
-                            :heading="__('No permissions yet')"
-                            :description="__('Run user-management:sync-permissions to generate them from your policies.')"
-                        />
-                    @else
-                        <flux:checkbox.group wire:model="selectedPermissions" class="space-y-5">
-                            @foreach ($permissions->groupBy(fn ($p) => \Illuminate\Support\Str::afterLast($p->name, '-')) as $group => $items)
-                                <div wire:key="group-{{ $group }}" class="space-y-2">
-                                    <flux:text size="sm" variant="subtle" class="font-medium uppercase tracking-wide">
-                                        {{ \Illuminate\Support\Str::headline($group) }}
-                                    </flux:text>
-
-                                    <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
-                                        @foreach ($items as $permission)
-                                            <flux:checkbox
-                                                wire:key="perm-{{ $permission->id }}"
-                                                value="{{ $permission->name }}"
-                                                :label="$permission->name"
-                                            />
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        </flux:checkbox.group>
-                        <flux:error name="selectedPermissions" />
-                    @endif
-                </x-user-management::form-section>
-            </div>
-        </div>
+        <x-user-management::form-section :title="__('Permissions')">
+            @if ($permissionGroups->isEmpty())
+                <x-user-management::empty-state
+                    icon="key"
+                    :heading="__('No permissions yet')"
+                    :description="__('Run user-management:sync-permissions to generate them from your policies.')"
+                />
+            @else
+                <x-user-management::permission-picker
+                    :groups="$permissionGroups"
+                    :selected="$selectedPermissions"
+                />
+                <flux:error name="selectedPermissions" />
+            @endif
+        </x-user-management::form-section>
 
         <div class="flex items-center justify-end gap-2">
             <flux:button

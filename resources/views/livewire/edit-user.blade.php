@@ -31,6 +31,8 @@
 
     <flux:separator variant="subtle" />
 
+    <x-user-management::form-errors />
+
     <form wire:submit.prevent="save" class="space-y-6">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2">

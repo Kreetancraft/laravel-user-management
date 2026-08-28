@@ -4,15 +4,17 @@ namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\UpdateRoleAction;
+use Kreetancraft\UserManagement\Livewire\Concerns\InteractsWithPermissionGroups;
 use Kreetancraft\UserManagement\Support\RolePresenter;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use SanderMuller\FluentValidation\FluentRule as Rule;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class EditRole extends Component
 {
+    use InteractsWithPermissionGroups;
+
     public Role $role;
 
     public string $name = '';
@@ -71,7 +73,7 @@ class EditRole extends Component
     public function render()
     {
         return view('user-management::livewire.edit-role', [
-            'permissions' => Permission::orderBy('name')->get(),
+            'permissionGroups' => $this->permissionGroups(),
             'isSystemRole' => $this->isSystemRole(),
         ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
     }
