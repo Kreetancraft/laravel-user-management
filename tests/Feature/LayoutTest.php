@@ -58,3 +58,11 @@ test('home falls back to the site root rather than erroring', function () {
 
     expect(Layout::home())->toBe('/');
 });
+
+test('a route name that does not exist does not become a relative link', function () {
+    // The default is the `dashboard` route name. An app without one must get the
+    // site root, not href="dashboard" pointing back at the current directory.
+    config()->set('user-management.routes.home', 'dashboard');
+
+    expect(Layout::home())->toBe('/');
+});
