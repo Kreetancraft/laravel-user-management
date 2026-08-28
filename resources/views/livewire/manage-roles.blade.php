@@ -5,7 +5,7 @@
     >
         <x-slot:breadcrumbs>
             <flux:breadcrumbs>
-                <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item href="{{ \Kreetancraft\UserManagement\Layout::home() }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
                 <flux:breadcrumbs.item>{{ __('Roles') }}</flux:breadcrumbs.item>
             </flux:breadcrumbs>
         </x-slot:breadcrumbs>

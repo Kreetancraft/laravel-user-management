@@ -73,6 +73,18 @@ Or extend it, which is how you add avatars or your own relations:
 class User extends \Kreetancraft\UserManagement\Models\User {}
 ```
 
+### Let Tailwind see this package
+
+Required. Tailwind v4 generates only the classes it finds by scanning files, and
+it does not scan `vendor/`. In `resources/css/app.css`:
+
+```css
+@source '../../vendor/kreetancraft/laravel-user-management/resources/views';
+```
+
+Skipping it fails confusingly rather than loudly — classes shared with your own
+views still work and only the ones unique to this package go missing.
+
 ### Provide the layouts
 
 Defaults match a stock Laravel starter kit. Note the asymmetry — it is Laravel's, not ours: the

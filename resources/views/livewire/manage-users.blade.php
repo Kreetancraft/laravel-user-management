@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <flux:breadcrumbs>
-        <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
+        <flux:breadcrumbs.item href="{{ \Kreetancraft\UserManagement\Layout::home() }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
         <flux:breadcrumbs.item>{{ __('Users') }}</flux:breadcrumbs.item>
     </flux:breadcrumbs>
 

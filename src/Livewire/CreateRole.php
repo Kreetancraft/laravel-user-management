@@ -4,6 +4,7 @@ namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\CreateRoleAction;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Livewire\Concerns\InteractsWithPermissionGroups;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -60,6 +61,6 @@ class CreateRole extends Component
     {
         return view('user-management::livewire.create-role', [
             'permissionGroups' => $this->permissionGroups(),
-        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
+        ])->layout(Layout::admin());
     }
 }

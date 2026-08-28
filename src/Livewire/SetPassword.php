@@ -5,6 +5,7 @@ namespace Kreetancraft\UserManagement\Livewire;
 use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\SetUserPasswordAction;
 use Kreetancraft\UserManagement\Contracts\UserContract;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -77,6 +78,6 @@ class SetPassword extends Component
     public function render()
     {
         return view('user-management::livewire.set-password')
-            ->layout(config('user-management.layouts.auth', 'components.layouts.auth'));
+            ->layout(Layout::auth());
     }
 }

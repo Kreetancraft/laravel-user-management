@@ -6,6 +6,7 @@ use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\CreatePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeletePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeleteRoleAction;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -135,7 +136,7 @@ class ManageRoles extends Component
     #[Title('Roles & Permissions - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'components.layouts.app');
+        $layout = Layout::admin();
 
         $roles = Role::with('permissions')
             ->where('name', 'like', '%'.$this->searchRoles.'%')

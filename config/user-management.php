@@ -76,7 +76,9 @@ return [
     'routes' => [
         'prefix' => 'admin',
         'middleware' => ['web', 'auth', 'verified', 'ensure.2fa.enforced'],
-        'home' => '/', // used for config('user-management.routes.home', '/') fallback, override to your dashboard
+        // Where the "Dashboard" breadcrumb points. A route name or a URL —
+        // a route name is better, since it survives the route moving.
+        'home' => 'dashboard',
         'security_edit' => null, // optional link to security settings page
         'names' => [
             'dashboard' => 'dashboard',

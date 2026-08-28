@@ -5,6 +5,7 @@ namespace Kreetancraft\UserManagement\Livewire;
 use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\UpdateUserAction;
 use Kreetancraft\UserManagement\Data\UpdateUserData;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Livewire\Concerns\HasAvailableRoles;
 use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
@@ -106,6 +107,6 @@ class EditUser extends Component
     {
         return view('user-management::livewire.edit-user', [
             'roles' => $this->availableRoles(),
-        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
+        ])->layout(Layout::admin());
     }
 }

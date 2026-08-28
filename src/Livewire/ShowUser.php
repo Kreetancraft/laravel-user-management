@@ -2,6 +2,7 @@
 
 namespace Kreetancraft\UserManagement\Livewire;
 
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -36,6 +37,6 @@ class ShowUser extends Component
 
         return view('user-management::livewire.show-user', [
             'history' => $history,
-        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
+        ])->layout(Layout::admin());
     }
 }

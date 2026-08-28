@@ -6,6 +6,7 @@ use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
 use Kreetancraft\UserManagement\Actions\DeleteUserAction;
 use Kreetancraft\UserManagement\Contracts\UserContract;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -101,7 +102,7 @@ class ManageUsers extends Component
     #[Title('User Management - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'components.layouts.app');
+        $layout = Layout::admin();
 
         $users = $this->users->paginated(
             $this->search,

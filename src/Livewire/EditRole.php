@@ -4,6 +4,7 @@ namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
 use Kreetancraft\UserManagement\Actions\UpdateRoleAction;
+use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Livewire\Concerns\InteractsWithPermissionGroups;
 use Kreetancraft\UserManagement\Support\RolePresenter;
 use Livewire\Attributes\Title;
@@ -75,7 +76,7 @@ class EditRole extends Component
         return view('user-management::livewire.edit-role', [
             'permissionGroups' => $this->permissionGroups(),
             'isSystemRole' => $this->isSystemRole(),
-        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
+        ])->layout(Layout::admin());
     }
 
     private function isSystemRole(): bool
