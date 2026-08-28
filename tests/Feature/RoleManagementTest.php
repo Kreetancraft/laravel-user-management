@@ -43,14 +43,14 @@ test('super admin creates a role with permissions', function () {
 
     Livewire::test(CreateRole::class)
         ->set('name', 'content-editor')
-        ->set('selectedPermissions', ['view-users', 'edit-users'])
+        ->set('selectedPermissions', ['view-users', 'update-users'])
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route(config('user-management.routes.names.roles.index', 'admin.roles')));
 
     $role = Role::findByName('content-editor');
     expect($role->hasPermissionTo('view-users'))->toBeTrue()
-        ->and($role->hasPermissionTo('edit-users'))->toBeTrue();
+        ->and($role->hasPermissionTo('update-users'))->toBeTrue();
 });
 
 test('create role validates unique role name', function () {

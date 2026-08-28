@@ -23,7 +23,7 @@ pest()->extend(TestCase::class)
 function packagePermissions(): array
 {
     return [
-        'view-users', 'create-users', 'edit-users', 'delete-users',
+        'view-users', 'create-users', 'update-users', 'delete-users',
         'manage-roles', 'manage-permissions',
     ];
 }

@@ -40,7 +40,7 @@ Route::middleware($middleware)->prefix($prefix)->group(function () use ($names) 
         Route::get('users/{user}', ShowUser::class)->name($names['users']['show'] ?? 'admin.users.show');
     });
 
-    Route::middleware('can:edit-users')->group(function () use ($names) {
+    Route::middleware('can:update-users')->group(function () use ($names) {
         Route::get('users/{user}/edit', EditUser::class)->name($names['users']['edit'] ?? 'admin.users.edit');
     });
 

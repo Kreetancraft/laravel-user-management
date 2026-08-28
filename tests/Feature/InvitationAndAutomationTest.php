@@ -174,7 +174,7 @@ test('the seeder and the permission catalog agree on user permissions', function
         ->pluck('name')->sort()->values()->all();
 
     expect($seeded)->not->toBeEmpty()
-        ->and($seeded)->toContain('view-users', 'create-users', 'edit-users', 'delete-users', 'manage-roles');
+        ->and($seeded)->toContain('view-users', 'create-users', 'update-users', 'delete-users', 'manage-roles');
 });
 
 // -------------------------------------------------------------------

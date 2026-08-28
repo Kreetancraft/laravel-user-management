@@ -7,6 +7,12 @@ use Kreetancraft\UserManagement\Models\User;
 class UserPolicy
 {
     /**
+     * Opts this policy into permission discovery, and names the subject its
+     * abilities are about: view-users, create-users, update-users, delete-users.
+     */
+    public const PERMISSION_SUBJECT = 'user';
+
+    /**
      * Super admins bypass every check via Gate::before in the package's service
      * provider.
      *
@@ -31,7 +37,7 @@ class UserPolicy
 
     public function update(User $user, User $target): bool
     {
-        if (! $user->can('edit-users')) {
+        if (! $user->can('update-users')) {
             return false;
         }
 
@@ -63,6 +69,6 @@ class UserPolicy
             return $user->isSuperAdmin();
         }
 
-        return $user->can('edit-users') || $user->can('create-users');
+        return $user->can('update-users') || $user->can('create-users');
     }
 }

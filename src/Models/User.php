@@ -107,6 +107,24 @@ class User extends Authenticatable implements PasskeyUser
      */
     public function avatarUrl(): ?string
     {
+        $resolver = config('user-management.avatar_resolver');
+
+        if ($resolver === null) {
+            return null;
+        }
+
+        // A callable, or a class with a __invoke / avatarFor method. Resolved
+        // through the container so it can take dependencies.
+        $resolver = is_string($resolver) ? app($resolver) : $resolver;
+
+        if (is_callable($resolver)) {
+            return $resolver($this);
+        }
+
+        if (method_exists($resolver, 'avatarFor')) {
+            return $resolver->avatarFor($this);
+        }
+
         return null;
     }
 

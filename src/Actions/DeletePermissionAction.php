@@ -24,7 +24,7 @@ class DeletePermissionAction
     protected function protectedPermissions(): array
     {
         return array_values(array_unique(array_merge(
-            ['view-users', 'create-users', 'edit-users', 'delete-users', 'manage-roles', 'manage-permissions'],
+            ['view-users', 'create-users', 'update-users', 'delete-users', 'manage-roles', 'manage-permissions'],
             (array) config('user-management.permissions.protected', []),
         )));
     }

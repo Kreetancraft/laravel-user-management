@@ -27,7 +27,7 @@ test('a protected core permission cannot be deleted', function () {
 
 test('every seeded core permission is protected', function () {
     $coreNames = [
-        'view-users', 'create-users', 'edit-users', 'delete-users',
+        'view-users', 'create-users', 'update-users', 'delete-users',
         'manage-roles', 'manage-permissions',
         'view-users',
 

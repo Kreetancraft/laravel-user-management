@@ -109,11 +109,28 @@ class UserManagementServiceProvider extends ServiceProvider
      * Last-super-admin guard lives in DeleteUserAction, not the policy,
      * because Gate::before would otherwise short-circuit it.
      */
+    /**
+     * Grant super admins everything.
+     *
+     * The interception point is configurable, as Filament Shield's is. `before`
+     * short-circuits policies entirely — which is why the self-delete and
+     * last-super-admin guards live in DeleteUserAction, where a short-circuit
+     * cannot skip them. `after` lets policies answer first and only then grants,
+     * which some applications will prefer.
+     */
     private function registerSuperAdminBypass(): void
     {
-        Gate::before(function ($user, $ability) {
+        if (! config('user-management.super_admin.enabled', true)) {
+            return;
+        }
+
+        $intercept = config('user-management.super_admin.intercept_gate', 'before') === 'after'
+            ? 'after'
+            : 'before';
+
+        Gate::{$intercept}(function ($user, $ability) use ($intercept) {
             if (! is_object($user)) {
-                return null;
+                return $intercept === 'after' ? false : null;
             }
 
             // Host App\User or package User both may have isSuperAdmin()
@@ -127,7 +144,9 @@ class UserManagementServiceProvider extends ServiceProvider
                 return true;
             }
 
-            return null;
+            // `before` must return null to let the policy speak; `after` is only
+            // consulted once it already has, so false there means "still no".
+            return $intercept === 'after' ? false : null;
         });
     }
 

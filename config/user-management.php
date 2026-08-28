@@ -11,11 +11,43 @@ return [
     |
     */
     'super_admin' => [
+        'enabled' => true,
         'role' => 'super-admin',
+
+        // Where the bypass hooks in, as Filament Shield's does:
+        //
+        //   'before' — super admins skip policies entirely. Anything a policy
+        //              would refuse them is granted, so guards that must apply
+        //              even to super admins belong in the action, not the policy.
+        //   'after'  — policies answer first; the bypass only grants what they
+        //              left undecided.
+        //
+        'intercept_gate' => 'before',
+
+        // Defaults for `user-management:super-admin` prompts. There is no
+        // password default on purpose — a real credential sitting in a published
+        // config file is not something to ship. Pass --password, or be prompted.
         'email' => env('UM_SUPER_ADMIN_EMAIL', 'superadmin@example.com'),
         'name' => env('UM_SUPER_ADMIN_NAME', 'Super Admin'),
-        'password' => env('UM_SUPER_ADMIN_PASSWORD', 'password'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Avatar resolver
+    |--------------------------------------------------------------------------
+    |
+    | This package ships no image handling. `User::avatarUrl()` returns null
+    | unless something is named here — a callable, or a class with __invoke()
+    | or avatarFor(User $user): ?string, resolved through the container.
+    |
+    | With kreetancraft/laravel-media-manager installed:
+    |
+    |     'avatar_resolver' => \Kreetancraft\Media\Support\MediaAvatarResolver::class,
+    |
+    | Neither package requires the other; this one line is the whole wiring.
+    |
+    */
+    'avatar_resolver' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -118,7 +150,10 @@ return [
         'separator' => '-',
         'case' => 'kebab',
         'methods' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
-        'custom' => ['manage-roles', 'manage-permissions', 'view-users', 'create-users', 'edit-users', 'delete-users'],
+        // Only abilities with NO policy behind them belong here. Everything a
+        // policy declares is discovered — listing it twice is how the
+        // `edit-users` / `update-users` split went unnoticed.
+        'custom' => ['manage-roles', 'manage-permissions'],
 
         // Permission names the UI refuses to delete, on top of this package's
         // own. Add yours here so an admin cannot lock themselves out.
@@ -131,8 +166,23 @@ return [
     |--------------------------------------------------------------------------
     */
     'policies' => [
-        'paths' => [app_path('Policies')],
         'discover' => true,
+
+        // Scan Gate::policies() — Laravel's own registry of model => policy.
+        // This is what makes a policy shipped INSIDE a package discoverable;
+        // scanning directories alone only ever finds this application's own.
+        'discover_registered' => true,
+
+        // Policy files never bound through Gate::policy().
+        'paths' => [app_path('Policies')],
+
+        // Gate::policies() holds every policy in the app, third-party ones
+        // included. A package opts in by declaring PERMISSION_SUBJECT on its
+        // policy; policies in these namespaces are always discovered.
+        'namespaces' => ['App\\'],
+
+        // Model or policy classes to skip entirely.
+        'exclude' => [],
     ],
 
     /*
