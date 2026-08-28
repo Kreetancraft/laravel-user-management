@@ -2,11 +2,11 @@
 
 namespace Kreetancraft\UserManagement\Actions;
 
+use Kreetancraft\UserManagement\Contracts\ManagesUsers;
 use Kreetancraft\UserManagement\Data\UpdateUserData;
 use Kreetancraft\UserManagement\Events\UserDeactivated;
 use Kreetancraft\UserManagement\Events\UserUpdated;
 use Kreetancraft\UserManagement\Models\User;
-use Kreetancraft\UserManagement\Repositories\UserRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateUserAction
@@ -19,7 +19,7 @@ class UpdateUserAction
     private const TRACKED = ['name', 'email', 'is_active', 'enforce_2fa'];
 
     public function __construct(
-        private UserRepository $users,
+        private ManagesUsers $users,
     ) {}
 
     /**

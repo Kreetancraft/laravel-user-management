@@ -1,62 +1,96 @@
 <?php
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Tests\TestCase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 pest()->extend(TestCase::class)
     ->use(LazilyRefreshDatabase::class)
     ->in('Feature', 'Unit');
 
-function seedRolesAndPermissions(): void
+/**
+ * Every permission this package ships behaviour for.
+ *
+ * The package seeds no permissions of its own at runtime — they are generated
+ * from policies by `user-management:sync-permissions`. Tests declare them
+ * explicitly so the suite is self-contained and carries no host-app vocabulary.
+ *
+ * @return list<string>
+ */
+function packagePermissions(): array
 {
-    $perms = [
-        'view-users','create-users','edit-users','delete-users',
-        'manage-roles','manage-permissions',
-        'manage-media',
-        'view-trips','create-trips','edit-trips','delete-trips','publish-trips',
-        'view-bookings','create-bookings','edit-bookings','cancel-bookings',
-        'view-payments','record-payments','issue-refunds','export-financials',
-        'view-inquiries','create-quotes','send-quotes',
-        'view-customers','create-customers','edit-customers','delete-customers',
-        'view-coupons','create-coupons','edit-coupons',
-        'view-invoices','create-invoices','edit-invoices',
-        'view-blogs','create-blogs','edit-blogs','delete-blogs','publish-blogs','moderate-blog-comments',
-        'view-content','manage-content',
-        'view-newsletter','manage-seo','view-settings','manage-settings',
+    return [
+        'view-users', 'create-users', 'edit-users', 'delete-users',
+        'manage-roles', 'manage-permissions',
     ];
-    foreach ($perms as $p) {
-        Permission::findOrCreate($p, 'web');
-    }
-    // Ensure all UserRole enum values exist as roles with appropriate perms
-    foreach (UserRole::cases() as $role) {
-        $r = Role::findOrCreate($role->value, 'web');
-        if ($role === UserRole::SuperAdmin) {
-            $r->syncPermissions(Permission::all());
-        } elseif ($role === UserRole::PackageManager) {
-            $r->syncPermissions(['view-trips','create-trips','edit-trips','delete-trips','publish-trips']);
-        } elseif ($role === UserRole::BookingManager) {
-            $r->syncPermissions(['view-trips','view-users']);
-        } elseif ($role === UserRole::FinanceAdmin) {
-            $r->syncPermissions(['view-trips']);
-        }
-    }
-    app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 }
 
-function actingAsRole(UserRole|string $role): User
+/**
+ * Create every package permission plus the super-admin role.
+ */
+function seedRolesAndPermissions(): void
+{
+    foreach (packagePermissions() as $permission) {
+        Permission::findOrCreate($permission, 'web');
+    }
+
+    Role::findOrCreate(User::superAdminRole(), 'web')
+        ->syncPermissions(Permission::all());
+
+    // Generic sample roles for tests that need *a* role to reference. They carry
+    // no permissions: the package seeds none, and tests grant what they need.
+    foreach (['editor', 'manager', 'viewer'] as $role) {
+        Role::findOrCreate($role, 'web');
+    }
+
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+}
+
+/**
+ * Create a role granting exactly the given permissions, and act as a user in it.
+ *
+ * Passing no permissions creates a role with none — useful for asserting that
+ * an unauthorised user is refused.
+ *
+ * @param  list<string>  $permissions
+ */
+function actingAsRole(string $role, array $permissions = []): User
 {
     seedRolesAndPermissions();
-    $name = $role instanceof UserRole ? $role->value : $role;
-    $user = User::factory()->withRole($name)->create();
+
+    $model = Role::findOrCreate($role, 'web');
+
+    if ($permissions !== []) {
+        foreach ($permissions as $permission) {
+            Permission::findOrCreate($permission, 'web');
+        }
+        $model->syncPermissions($permissions);
+    }
+
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $user = User::factory()->withRole($role)->create();
     test()->actingAs($user);
+
     return $user;
 }
 
+/**
+ * Act as a user who can do everything (via the Gate::before bypass).
+ */
 function actingAsSuperAdmin(): User
 {
-    return actingAsRole(UserRole::SuperAdmin);
+    return actingAsRole(User::superAdminRole());
+}
+
+/**
+ * Act as a user holding every package permission but WITHOUT the super-admin
+ * role — the case that actually exercises the policies rather than the bypass.
+ */
+function actingAsAdmin(): User
+{
+    return actingAsRole('admin', packagePermissions());
 }

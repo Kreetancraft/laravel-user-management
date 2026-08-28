@@ -4,14 +4,13 @@ namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
 use Illuminate\Auth\Access\AuthorizationException;
-use Livewire\Attributes\Layout;
+use Kreetancraft\UserManagement\Actions\DeleteUserAction;
+use Kreetancraft\UserManagement\Contracts\UserContract;
+use Kreetancraft\UserManagement\Models\User;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Kreetancraft\UserManagement\Actions\DeleteUserAction;
-use Kreetancraft\UserManagement\Contracts\UserContract;
-use Kreetancraft\UserManagement\Models\User;
 use Spatie\Permission\Models\Role;
 
 class ManageUsers extends Component
@@ -59,6 +58,15 @@ class ManageUsers extends Component
         $this->resetPage();
     }
 
+    /**
+     * Reset every filter at once and return to the first page.
+     */
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'roleFilter', 'statusFilter']);
+        $this->resetPage();
+    }
+
     public function confirmDelete(int $userId): void
     {
         $this->pendingDeleteId = $userId;
@@ -93,7 +101,7 @@ class ManageUsers extends Component
     #[Title('User Management - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'layouts.app');
+        $layout = config('user-management.layouts.admin', 'components.layouts.app');
 
         $users = $this->users->paginated(
             $this->search,

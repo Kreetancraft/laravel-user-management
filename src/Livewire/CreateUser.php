@@ -3,13 +3,12 @@
 namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
-use Livewire\Attributes\Title;
-use Livewire\Component;
 use Kreetancraft\UserManagement\Actions\CreateUserAction;
 use Kreetancraft\UserManagement\Data\StoreUserData;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Livewire\Concerns\HasAvailableRoles;
 use Kreetancraft\UserManagement\Models\User;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 use SanderMuller\FluentValidation\FluentRule as Rule;
 
 class CreateUser extends Component
@@ -78,6 +77,6 @@ class CreateUser extends Component
     {
         return view('user-management::livewire.create-user', [
             'roles' => $this->availableRoles(),
-        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
     }
 }

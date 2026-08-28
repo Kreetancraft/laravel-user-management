@@ -29,10 +29,8 @@ test('every seeded core permission is protected', function () {
     $coreNames = [
         'view-users', 'create-users', 'edit-users', 'delete-users',
         'manage-roles', 'manage-permissions',
-        'view-trips', 'create-trips', 'edit-trips', 'delete-trips', 'publish-trips',
-        'view-bookings', 'create-bookings', 'edit-bookings', 'cancel-bookings',
-        'view-payments', 'record-payments', 'issue-refunds', 'export-financials',
-        'view-inquiries', 'create-quotes', 'send-quotes',
+        'view-users',
+
     ];
 
     foreach ($coreNames as $name) {

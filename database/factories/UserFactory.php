@@ -5,7 +5,6 @@ namespace Kreetancraft\UserManagement\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -88,33 +87,16 @@ class UserFactory extends Factory
     /**
      * Assign a role to the created user.
      */
-    public function withRole(UserRole|string $role): static
+    public function withRole(string $role): static
     {
-        $roleName = $role instanceof UserRole ? $role->value : $role;
-
-        return $this->afterCreating(function (User $user) use ($roleName) {
-            Role::findOrCreate($roleName, 'web');
-            $user->assignRole($roleName);
+        return $this->afterCreating(function (User $user) use ($role) {
+            Role::findOrCreate($role, 'web');
+            $user->assignRole($role);
         });
     }
 
     public function superAdmin(): static
     {
-        return $this->withRole(UserRole::SuperAdmin);
-    }
-
-    public function packageManager(): static
-    {
-        return $this->withRole(UserRole::PackageManager);
-    }
-
-    public function bookingManager(): static
-    {
-        return $this->withRole(UserRole::BookingManager);
-    }
-
-    public function financeAdmin(): static
-    {
-        return $this->withRole(UserRole::FinanceAdmin);
+        return $this->withRole(User::superAdminRole());
     }
 }

@@ -6,8 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use ReflectionClass;
-use ReflectionMethod;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class SyncPermissionsCommand extends Command
 {
@@ -19,7 +19,7 @@ class SyncPermissionsCommand extends Command
     {
         $separator = config('user-management.permissions.separator', '-');
         $case = config('user-management.permissions.case', 'kebab');
-        $methods = config('user-management.permissions.methods', ['viewAny','view','create','update','delete','restore','forceDelete']);
+        $methods = config('user-management.permissions.methods', ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']);
         $custom = config('user-management.permissions.custom', []);
         $paths = config('user-management.policies.paths', [app_path('Policies')]);
         $discover = config('user-management.policies.discover', true);
@@ -58,15 +58,20 @@ class SyncPermissionsCommand extends Command
         }
 
         if ($this->option('fresh')) {
+            // Never prune a protected permission: --fresh must not be able to
+            // delete the permissions the admin UI itself depends on.
+            $protected = collect(config('user-management.permissions.protected', []))
+                ->merge(config('user-management.permissions.custom', []));
+
             $existing = Permission::pluck('name');
-            $toDelete = $existing->diff($all);
+            $toDelete = $existing->diff($all)->diff($protected);
             foreach ($toDelete as $perm) {
                 Permission::where('name', $perm)->delete();
                 $this->line("  <fg=red>✗</> {$perm} removed");
             }
         }
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->info("Synced {$all->count()} permissions.");
 
@@ -88,7 +93,7 @@ class SyncPermissionsCommand extends Command
         ];
         $methodKebab = $map[$methodKebab] ?? $methodKebab;
 
-        return $methodKebab . $separator . Str::plural($modelKebab);
+        return $methodKebab.$separator.Str::plural($modelKebab);
     }
 
     private function classFromFile(string $path): ?string
@@ -100,6 +105,7 @@ class SyncPermissionsCommand extends Command
         if (! preg_match('/class\s+(\w+)/', $content, $classMatch)) {
             return null;
         }
-        return trim($nsMatch[1]) . '\\' . trim($classMatch[1]);
+
+        return trim($nsMatch[1]).'\\'.trim($classMatch[1]);
     }
 }

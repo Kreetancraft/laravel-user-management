@@ -3,10 +3,10 @@
 namespace Kreetancraft\UserManagement\Actions\Fortify;
 
 use Illuminate\Support\Facades\Validator;
-use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Kreetancraft\UserManagement\Concerns\PasswordValidationRules;
 use Kreetancraft\UserManagement\Concerns\ProfileValidationRules;
 use Kreetancraft\UserManagement\Models\User;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {

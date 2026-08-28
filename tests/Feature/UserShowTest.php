@@ -1,9 +1,9 @@
 <?php
 
-use Livewire\Livewire;
 use Kreetancraft\UserManagement\Livewire\ShowUser;
 use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Models\UserLoginHistory;
+use Livewire\Livewire;
 use Torann\GeoIP\Facades\GeoIP;
 use Torann\GeoIP\Location;
 

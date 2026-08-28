@@ -1,12 +1,13 @@
-<x-layouts::auth :title="__('Log in')">
+<x-dynamic-component :component="config('user-management.layouts.auth', 'layouts.auth')" :title="__('Log in')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Welcome back')" :description="__('Sign in to your account to continue')" />
+        <x-user-management::auth-header :title="__('Welcome back')" :description="__('Sign in to your account to continue')" />
 
         <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+        <x-user-management::auth-session-status class="text-center" :status="session('status')" />
 
-        <x-passkey-verify />
-
+        @if (\Illuminate\Support\Facades\View::exists('components.passkey-verify'))
+                <x-dynamic-component component="passkey-verify" />
+            @endif
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
             @csrf
 
@@ -55,4 +56,4 @@
             {{ config('app.name', 'Himalayan Trek Ventures') }} &copy; {{ date('Y') }}
         </flux:text>
     </div>
-</x-layouts::auth>
+</x-dynamic-component>

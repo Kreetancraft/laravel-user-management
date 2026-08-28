@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Kreetancraft\UserManagement\Console\InstallCommand;
+use Kreetancraft\UserManagement\Console\SuperAdminCommand;
+use Kreetancraft\UserManagement\Console\SyncPermissionsCommand;
+use Kreetancraft\UserManagement\Contracts\ManagesUsers;
+use Kreetancraft\UserManagement\Contracts\QueriesUsers;
 use Kreetancraft\UserManagement\Contracts\RoleContract;
 use Kreetancraft\UserManagement\Contracts\UserContract;
 use Kreetancraft\UserManagement\Http\Middleware\EnsureTwoFactorEnforced;
@@ -22,7 +27,12 @@ class UserManagementServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/user-management.php', 'user-management');
 
+        // One implementation, three views of it: consumers depend on the
+        // narrowest interface that covers what they actually do.
+        $this->app->singleton(UserRepository::class);
         $this->app->bind(UserContract::class, UserRepository::class);
+        $this->app->bind(ManagesUsers::class, UserRepository::class);
+        $this->app->bind(QueriesUsers::class, UserRepository::class);
         $this->app->bind(RoleContract::class, RoleRepository::class);
 
         $this->app->register(EventServiceProvider::class);
@@ -63,10 +73,6 @@ class UserManagementServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../resources/views' => resource_path('views/vendor/user-management'),
         ], 'user-management-views');
-
-        $this->publishes([
-            __DIR__.'/../../resources/css/user-management.css' => resource_path('css/vendor/user-management.css'),
-        ], 'user-management-assets');
 
         Blade::componentNamespace('Kreetancraft\UserManagement\\View\\Components', 'user-management');
         Blade::anonymousComponentPath(__DIR__.'/../../resources/views/components', 'user-management');
@@ -129,9 +135,9 @@ class UserManagementServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Kreetancraft\UserManagement\Console\SuperAdminCommand::class,
-                \Kreetancraft\UserManagement\Console\SyncPermissionsCommand::class,
-                \Kreetancraft\UserManagement\Console\InstallCommand::class,
+                SuperAdminCommand::class,
+                SyncPermissionsCommand::class,
+                InstallCommand::class,
             ]);
         }
     }

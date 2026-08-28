@@ -6,8 +6,8 @@
 
     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
         <div class="space-y-3">
-            <flux:heading size="2xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Roles & Permissions') }}</flux:heading>
-            <flux:subheading class="leading-6 text-zinc-500 dark:text-zinc-400">{{ __('Define and manage access levels and fine-grained permissions.') }}</flux:subheading>
+            <flux:heading size="2xl" level="1">{{ __('Roles & Permissions') }}</flux:heading>
+            <flux:subheading variant="subtle">{{ __('Define and manage access levels and fine-grained permissions.') }}</flux:subheading>
         </div>
     </div>
 
@@ -43,11 +43,9 @@
                             <flux:table.row :key="$role->id">
                                 <flux:table.cell class="font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:icon icon="shield-check" variant="mini" class="text-zinc-400 dark:text-zinc-500" />
-                                        @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
-                                        <span>{{ $enum?->label() ?? $role->name }}</span>
+                                        <x-user-management::role-badge :role="$role" icon />
                                         @if (in_array($role->name, $systemRoles, true))
-                                            <flux:badge size="sm" color="amber">{{ __('System') }}</flux:badge>
+                                            <flux:badge size="sm" color="amber" icon="lock-closed">{{ __('System') }}</flux:badge>
                                         @endif
                                     </div>
                                 </flux:table.cell>
@@ -56,7 +54,7 @@
                                         @forelse ($role->permissions as $perm)
                                             <flux:badge size="sm" color="zinc">{{ $perm->name }}</flux:badge>
                                         @empty
-                                            <flux:text class="text-zinc-400 dark:text-zinc-500 text-xs">{{ __('No Permissions') }}</flux:text>
+                                            <flux:text size="sm" variant="subtle">{{ __('No Permissions') }}</flux:text>
                                         @endforelse
                                     </div>
                                 </flux:table.cell>
@@ -102,7 +100,7 @@
                             <flux:table.row :key="$permission->id">
                                 <flux:table.cell class="font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:icon icon="key" variant="mini" class="text-zinc-400 dark:text-zinc-500" />
+                                        <flux:icon icon="key" variant="mini" variant="subtle" />
                                         <span>{{ $permission->name }}</span>
                                     </div>
                                 </flux:table.cell>

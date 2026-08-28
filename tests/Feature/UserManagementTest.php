@@ -1,11 +1,10 @@
 <?php
 
-use Livewire\Livewire;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Livewire\CreateUser;
 use Kreetancraft\UserManagement\Livewire\EditUser;
 use Kreetancraft\UserManagement\Livewire\ManageUsers;
 use Kreetancraft\UserManagement\Models\User;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -35,8 +34,8 @@ test('super admin can view the user index', function () {
         ->assertSeeLivewire(ManageUsers::class);
 });
 
-test('booking manager cannot view the user index', function () {
-    actingAsRole(UserRole::BookingManager);
+test('a role without view-users cannot view the user index', function () {
+    actingAsRole('manager');
 
     $this->get(route(config('user-management.routes.names.users.index', 'admin.users')))->assertForbidden();
 });
@@ -51,7 +50,7 @@ test('super admin creates a user via livewire component', function () {
     Livewire::test(CreateUser::class)
         ->set('name', 'Jane Doe')
         ->set('email', 'jane@example.com')
-        ->set('selectedRoles', [UserRole::BookingManager->value])
+        ->set('selectedRoles', ['manager'])
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route(config('user-management.routes.names.users.index', 'admin.users')));
@@ -64,7 +63,7 @@ test('super admin creates a user via livewire component', function () {
     ]);
 
     $user = User::where('email', 'jane@example.com')->first();
-    expect($user->hasRole(UserRole::BookingManager->value))->toBeTrue();
+    expect($user->hasRole('manager'))->toBeTrue();
 });
 
 test('create user validates required fields', function () {
@@ -100,7 +99,7 @@ test('non-super-admin with create-users permission cannot assign super-admin rol
     Livewire::test(CreateUser::class)
         ->set('name', 'Jane')
         ->set('email', 'jane@example.com')
-        ->set('selectedRoles', [UserRole::SuperAdmin->value])
+        ->set('selectedRoles', [User::superAdminRole()])
         ->call('save')
         ->assertForbidden();
 
@@ -114,7 +113,7 @@ test('non-super-admin with create-users permission cannot assign super-admin rol
 test('edit user loads target data into the form', function () {
     actingAsSuperAdmin();
 
-    $target = User::factory()->bookingManager()->create([
+    $target = User::factory()->withRole('manager')->create([
         'name' => 'Original Name',
         'email' => 'original@example.com',
     ]);
@@ -122,18 +121,18 @@ test('edit user loads target data into the form', function () {
     Livewire::test(EditUser::class, ['user' => $target])
         ->assertSet('name', 'Original Name')
         ->assertSet('email', 'original@example.com')
-        ->assertSet('selectedRoles', [UserRole::BookingManager->value]);
+        ->assertSet('selectedRoles', ['manager']);
 });
 
 test('edit user updates details and roles', function () {
     actingAsSuperAdmin();
 
-    $target = User::factory()->bookingManager()->create();
+    $target = User::factory()->withRole('manager')->create();
 
     Livewire::test(EditUser::class, ['user' => $target])
         ->set('name', 'Updated Name')
         ->set('email', 'updated@example.com')
-        ->set('selectedRoles', [UserRole::PackageManager->value])
+        ->set('selectedRoles', ['editor'])
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route(config('user-management.routes.names.users.index', 'admin.users')));
@@ -141,8 +140,8 @@ test('edit user updates details and roles', function () {
     $target->refresh();
     expect($target->name)->toBe('Updated Name')
         ->and($target->email)->toBe('updated@example.com')
-        ->and($target->hasRole(UserRole::PackageManager->value))->toBeTrue()
-        ->and($target->hasRole(UserRole::BookingManager->value))->toBeFalse();
+        ->and($target->hasRole('editor'))->toBeTrue()
+        ->and($target->hasRole('manager'))->toBeFalse();
 });
 
 test('edit user prevents demoting the last super-admin', function () {
@@ -151,7 +150,7 @@ test('edit user prevents demoting the last super-admin', function () {
     Livewire::test(EditUser::class, ['user' => $superAdmin])
         ->set('name', $superAdmin->name)
         ->set('email', $superAdmin->email)
-        ->set('selectedRoles', [UserRole::PackageManager->value])
+        ->set('selectedRoles', ['editor'])
         ->call('save');
 
     $superAdmin->refresh();
@@ -165,7 +164,7 @@ test('edit user prevents demoting the last super-admin', function () {
 test('super admin can delete another user', function () {
     actingAsSuperAdmin();
 
-    $target = User::factory()->bookingManager()->create();
+    $target = User::factory()->withRole('manager')->create();
 
     Livewire::test(ManageUsers::class)
         ->call('confirmDelete', $target->id)
@@ -210,8 +209,8 @@ test('the last super-admin cannot be deleted', function () {
 
 test('the user index filters by active status', function () {
     actingAsSuperAdmin();
-    User::factory()->bookingManager()->create(['name' => 'Active Bob', 'is_active' => true]);
-    User::factory()->bookingManager()->create(['name' => 'Inactive Ivy', 'is_active' => false]);
+    User::factory()->withRole('manager')->create(['name' => 'Active Bob', 'is_active' => true]);
+    User::factory()->withRole('manager')->create(['name' => 'Inactive Ivy', 'is_active' => false]);
 
     Livewire::test(ManageUsers::class)
         ->set('statusFilter', 'inactive')
@@ -221,7 +220,7 @@ test('the user index filters by active status', function () {
 
 test('editing a user can deactivate them', function () {
     actingAsSuperAdmin();
-    $target = User::factory()->bookingManager()->create(['is_active' => true]);
+    $target = User::factory()->withRole('manager')->create(['is_active' => true]);
 
     Livewire::test(EditUser::class, ['user' => $target])
         ->set('is_active', false)

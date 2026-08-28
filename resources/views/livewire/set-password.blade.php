@@ -2,9 +2,9 @@
         @if ($invalid)
             <flux:card>
                 <div class="p-6 text-center space-y-4">
-                    <flux:icon name="exclamation-triangle" class="w-12 h-12 mx-auto text-zinc-400" />
+                    <flux:icon name="exclamation-triangle" class="mx-auto size-12 opacity-40" />
                     <flux:heading size="lg">{{ __('Invalid or expired invitation') }}</flux:heading>
-                    <flux:text class="text-zinc-500 dark:text-zinc-400">
+                    <flux:text variant="subtle">
                         {{ __('This invitation link is invalid or has expired. Please ask an administrator to send a new one.') }}
                     </flux:text>
                     <flux:button href="{{ route(config('user-management.routes.names.login', 'login')) }}" variant="primary" wire:navigate>
@@ -14,7 +14,7 @@
             </flux:card>
         @else
             <div class="text-center space-y-2">
-                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Set your password') }}</flux:heading>
+                <flux:heading size="xl" level="1">{{ __('Set your password') }}</flux:heading>
                 <flux:subheading>{{ __('Welcome, :name. Choose a password to activate your account.', ['name' => $user->name]) }}</flux:subheading>
             </div>
 

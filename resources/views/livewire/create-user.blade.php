@@ -8,7 +8,7 @@
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div>
-                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Create User') }}</flux:heading>
+                <flux:heading size="xl" level="1">{{ __('Create User') }}</flux:heading>
                 <flux:subheading>{{ __('Add a new staff member and assign their role.') }}</flux:subheading>
             </div>
             <div class="flex items-center gap-2">
@@ -73,23 +73,15 @@
                     @endif
                     <flux:checkbox.group wire:model="selectedRoles" class="space-y-2">
                         @foreach ($roles as $role)
-                            @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
                             <label wire:key="role-{{ $role->id }}" class="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-surface-muted cursor-pointer transition">
                                 <flux:checkbox value="{{ $role->name }}" class="mt-0.5" />
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <flux:text class="font-medium text-content">
-                                            {{ $enum?->label() ?? $role->name }}
-                                        </flux:text>
-                                        @if ($enum)
-                                            <flux:badge size="sm" color="{{ $enum->color() }}">{{ $enum->value }}</flux:badge>
-                                        @endif
+                                        <x-user-management::role-badge :role="$role" icon />
                                     </div>
-                                    @if ($enum?->description())
-                                        <flux:text class="text-xs text-content-muted mt-1 block">
-                                            {{ $enum->description() }}
-                                        </flux:text>
-                                    @endif
+                                    <flux:text size="sm" variant="subtle" class="mt-1 block">
+                                        {{ trans_choice('{0}No permissions|{1}:count permission|[2,*]:count permissions', $role->permissions_count ?? 0, ['count' => $role->permissions_count ?? 0]) }}
+                                    </flux:text>
                                 </div>
                             </label>
                         @endforeach

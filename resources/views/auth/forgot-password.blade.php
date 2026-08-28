@@ -1,9 +1,9 @@
-<x-layouts::auth :title="__('Forgot password')">
+<x-dynamic-component :component="config('user-management.layouts.auth', 'layouts.auth')" :title="__('Forgot password')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+        <x-user-management::auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
 
         <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+        <x-user-management::auth-session-status class="text-center" :status="session('status')" />
 
         <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
             @csrf
@@ -28,4 +28,4 @@
             <flux:link :href="route(config('user-management.routes.names.login', 'login'))" wire:navigate>{{ __('log in') }}</flux:link>
         </div>
     </div>
-</x-layouts::auth>
+</x-dynamic-component>

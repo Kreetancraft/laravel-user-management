@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Laravel\Fortify\Fortify;
 use Kreetancraft\UserManagement\Actions\Fortify\CreateNewUser;
 use Kreetancraft\UserManagement\Actions\Fortify\ResetUserPassword;
 use Kreetancraft\UserManagement\Models\User;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -21,7 +22,37 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->syncFortifyFeatures();
+    }
+
+    /**
+     * Keep Fortify's feature list in step with this package's own flags.
+     *
+     * Without this, turning a feature off here would still leave Fortify
+     * registering its route while this package declines to register the view —
+     * producing an unresolvable RegisterViewResponse rather than an honest 404.
+     */
+    private function syncFortifyFeatures(): void
+    {
+        $map = [
+            Features::registration() => 'registration',
+            Features::twoFactorAuthentication() => 'two_factor',
+        ];
+
+        $features = (array) config('fortify.features', []);
+
+        foreach ($map as $fortifyFeature => $flag) {
+            $enabled = (bool) config("user-management.features.{$flag}", true);
+            $present = in_array($fortifyFeature, $features, true);
+
+            if (! $enabled && $present) {
+                $features = array_values(array_diff($features, [$fortifyFeature]));
+            } elseif ($enabled && ! $present) {
+                $features[] = $fortifyFeature;
+            }
+        }
+
+        config(['fortify.features' => $features]);
     }
 
     /**

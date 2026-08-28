@@ -1,6 +1,5 @@
 <?php
 
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Models\User;
 
 beforeEach(function () {
@@ -37,9 +36,9 @@ test('withTwoFactor sets up two-factor fields', function () {
 });
 
 test('withRole assigns the given enum role', function () {
-    $user = User::factory()->withRole(UserRole::BookingManager)->create();
+    $user = User::factory()->withRole('manager')->create();
 
-    expect($user->hasRole(UserRole::BookingManager->value))->toBeTrue();
+    expect($user->hasRole('manager'))->toBeTrue();
 });
 
 test('withRole also accepts a string role name', function () {
@@ -48,26 +47,14 @@ test('withRole also accepts a string role name', function () {
     expect($user->hasRole('finance-admin'))->toBeTrue();
 });
 
-test('superAdmin shortcut assigns the SuperAdmin role', function () {
+test('superAdmin shortcut assigns the configured super-admin role', function () {
     $user = User::factory()->superAdmin()->create();
 
     expect($user->isSuperAdmin())->toBeTrue();
 });
 
-test('packageManager shortcut assigns the PackageManager role', function () {
-    $user = User::factory()->packageManager()->create();
+test('withRole assigns an arbitrary role, creating it if needed', function (string $role) {
+    $user = User::factory()->withRole($role)->create();
 
-    expect($user->hasRole(UserRole::PackageManager->value))->toBeTrue();
-});
-
-test('bookingManager shortcut assigns the BookingManager role', function () {
-    $user = User::factory()->bookingManager()->create();
-
-    expect($user->hasRole(UserRole::BookingManager->value))->toBeTrue();
-});
-
-test('financeAdmin shortcut assigns the FinanceAdmin role', function () {
-    $user = User::factory()->financeAdmin()->create();
-
-    expect($user->hasRole(UserRole::FinanceAdmin->value))->toBeTrue();
-});
+    expect($user->hasRole($role))->toBeTrue();
+})->with(['editor', 'manager', 'viewer', 'some-role-nobody-predefined']);

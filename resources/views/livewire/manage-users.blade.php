@@ -1,170 +1,214 @@
-<div class="space-y-8">
-    {{-- Breadcrumbs — subtle, 60 points --}}
-    <flux:breadcrumbs class="leading-6">
+<div class="space-y-6">
+    <flux:breadcrumbs>
         <flux:breadcrumbs.item href="{{ config('user-management.routes.home', '/') }}" wire:navigate>{{ __('Dashboard') }}</flux:breadcrumbs.item>
         <flux:breadcrumbs.item>{{ __('Users') }}</flux:breadcrumbs.item>
     </flux:breadcrumbs>
 
-    {{-- Hero — 120 points: heading + CTA --}}
-    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-        <div class="space-y-3">
-            <flux:heading size="2xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('User Management') }}</flux:heading>
-            <flux:subheading class="leading-6 text-zinc-900 dark:text-zinc-100 max-w-xl">{{ __('Manage your application users and roles here.') }}</flux:subheading>
-            <div class="flex flex-wrap items-center gap-3 pt-2">
-                <span class="inline-flex items-center rounded-full bg-white text-black px-3 py-1 text-xs font-medium leading-none">{{ __(':count total', ['count' => $users->total()]) }}</span>
-                <span class="inline-flex items-center rounded-full bg-emerald-500 text-zinc-900 dark:text-zinc-100 px-3 py-1 text-xs font-medium leading-none">{{ __(':count active', ['count' => $activeCount]) }}</span>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="space-y-2">
+            <flux:heading size="xl" level="1">{{ __('Users') }}</flux:heading>
+            <flux:subheading class="max-w-xl">{{ __('Invite people, assign roles, and control who can sign in.') }}</flux:subheading>
+
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+                <flux:badge size="sm" color="zinc" icon="users">
+                    {{ __(':count total', ['count' => $users->total()]) }}
+                </flux:badge>
+                <flux:badge size="sm" :color="\Kreetancraft\UserManagement\Support\RolePresenter::statusColor(true)" icon="check-circle">
+                    {{ __(':count active', ['count' => $activeCount]) }}
+                </flux:badge>
             </div>
         </div>
+
         @can('create', Kreetancraft\UserManagement\Models\User::class)
-            <flux:button href="{{ route(config('user-management.routes.names.users.create', 'admin.users.create')) }}" icon="plus" variant="primary" size="sm" class="rounded-[var(--radius-md)] leading-6" wire:navigate>
-                {{ __('Create User') }}
+            <flux:button
+                href="{{ route(config('user-management.routes.names.users.create', 'admin.users.create')) }}"
+                icon="plus"
+                variant="primary"
+                wire:navigate
+            >
+                {{ __('Invite user') }}
             </flux:button>
         @endcan
     </div>
 
-    {{-- Filters — 60 points, generous whitespace, no decoration --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-y border-zinc-200 dark:border-zinc-800">
-        <div class="w-full sm:w-[420px] relative">
+    <flux:separator variant="subtle" />
+
+    {{-- Filters --}}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div class="relative w-full sm:max-w-xs">
             <flux:input
                 wire:model.live.debounce.300ms="search"
-                placeholder="{{ __('Search users...') }}"
+                placeholder="{{ __('Search name or email…') }}"
                 icon="magnifying-glass"
-                class="leading-6"
             />
-            <div wire:loading wire:target="search, roleFilter, statusFilter, sort" class="absolute right-3 top-1/2 -translate-y-1/2">
-                <flux:icon icon="arrow-path" class="animate-spin size-3.5 text-zinc-900 dark:text-zinc-100/40" />
+            <div
+                wire:loading.flex
+                wire:target="search, roleFilter, statusFilter, sort"
+                class="absolute inset-y-0 right-3 items-center"
+            >
+                <flux:icon icon="arrow-path" variant="mini" class="animate-spin opacity-50" />
             </div>
         </div>
 
-        <div class="flex items-center gap-6">
-            <flux:select wire:model.live="roleFilter" class="w-44 leading-6" placeholder="{{ __('All roles') }}">
-                <flux:select.option value="">{{ __('All roles') }}</flux:select.option>
-                @foreach ($roleOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
-                @endforeach
-            </flux:select>
+        <flux:select wire:model.live="roleFilter" class="sm:w-44">
+            <flux:select.option value="">{{ __('All roles') }}</flux:select.option>
+            @foreach ($roleOptions as $value => $label)
+                <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
+            @endforeach
+        </flux:select>
 
-            <flux:select wire:model.live="statusFilter" class="w-44 leading-6" placeholder="{{ __('All statuses') }}">
-                <flux:select.option value="">{{ __('All statuses') }}</flux:select.option>
-                <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
-                <flux:select.option value="inactive">{{ __('Inactive') }}</flux:select.option>
-            </flux:select>
-        </div>
+        <flux:select wire:model.live="statusFilter" class="sm:w-44">
+            <flux:select.option value="">{{ __('All statuses') }}</flux:select.option>
+            <flux:select.option value="active">{{ __('Active') }}</flux:select.option>
+            <flux:select.option value="inactive">{{ __('Inactive') }}</flux:select.option>
+        </flux:select>
+
+        @if ($search || $roleFilter || $statusFilter)
+            <flux:button variant="subtle" size="sm" icon="x-mark" wire:click="clearFilters">
+                {{ __('Clear') }}
+            </flux:button>
+        @endif
     </div>
 
     @if ($users->isEmpty())
-        <div class="bg-white dark:bg-zinc-900 rounded-[var(--radius-lg)] border border-zinc-200 dark:border-zinc-800 p-16 lg:p-24 text-center">
-            <flux:heading size="lg" class="leading-7 text-zinc-900 dark:text-zinc-100">{{ __('No users found') }}</flux:heading>
-            <flux:text class="mt-3 leading-6 text-zinc-900 dark:text-zinc-100/60">
+        <flux:card>
+            <x-user-management::empty-state
+                icon="users"
+                :heading="__('No users found')"
+                :description="($search || $roleFilter || $statusFilter) ? __('No users match your current filters.') : __('Invite someone to get started — they set their own password.')"
+            >
                 @if ($search || $roleFilter || $statusFilter)
-                    {{ __('No users match your current filters.') }}
+                    <flux:button variant="subtle" size="sm" icon="x-mark" wire:click="clearFilters">
+                        {{ __('Clear filters') }}
+                    </flux:button>
                 @else
-                    {{ __('Start by creating a new user account.') }}
+                    @can('create', Kreetancraft\UserManagement\Models\User::class)
+                        <flux:button
+                            href="{{ route(config('user-management.routes.names.users.create', 'admin.users.create')) }}"
+                            icon="plus"
+                            variant="primary"
+                            size="sm"
+                            wire:navigate
+                        >
+                            {{ __('Invite user') }}
+                        </flux:button>
+                    @endcan
                 @endif
-            </flux:text>
-            @if ($search || $roleFilter || $statusFilter)
-                <flux:button variant="ghost" size="sm" wire:click="$set('search', '')" class="mt-6 leading-6">{{ __('Clear filters') }}</flux:button>
-            @endif
-        </div>
+            </x-user-management::empty-state>
+        </flux:card>
     @else
-        {{-- Premium table — hero, 70-85% visual weight --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-[var(--radius-lg)] overflow-hidden border border-zinc-200 dark:border-zinc-800">
-            <flux:table :paginate="$users" class="w-full">
-                <flux:table.columns class="bg-zinc-50 dark:bg-zinc-900">
-                    <flux:table.column class="w-16 leading-6"></flux:table.column>
-                    <flux:table.column class="leading-6 tracking-tight" sortable :sorted="$sort === 'name'" wire:click="$set('sort', 'name')">{{ __('Name') }}</flux:table.column>
-                    <flux:table.column class="leading-6">{{ __('Email') }}</flux:table.column>
-                    <flux:table.column class="leading-6">{{ __('Roles') }}</flux:table.column>
-                    <flux:table.column class="leading-6">{{ __('Status') }}</flux:table.column>
-                    <flux:table.column class="leading-6" sortable :sorted="$sort === 'last_login_at'" wire:click="$set('sort', 'last_login_at')">{{ __('Last Login') }}</flux:table.column>
-                    <flux:table.column class="leading-6 text-right">{{ __('Actions') }}</flux:table.column>
-                </flux:table.columns>
+        <flux:table :paginate="$users">
+            <flux:table.columns>
+                <flux:table.column sortable :sorted="$sort === 'name'" wire:click="$set('sort', 'name')">{{ __('User') }}</flux:table.column>
+                <flux:table.column>{{ __('Roles') }}</flux:table.column>
+                <flux:table.column>{{ __('Status') }}</flux:table.column>
+                <flux:table.column sortable :sorted="$sort === 'last_login_at'" wire:click="$set('sort', 'last_login_at')">{{ __('Last login') }}</flux:table.column>
+                <flux:table.column />
+            </flux:table.columns>
 
-                <flux:table.rows>
-                    @foreach ($users as $user)
-                        <flux:table.row :key="$user->id" class="hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                            <flux:table.cell>
+            <flux:table.rows>
+                @foreach ($users as $user)
+                    <flux:table.row :key="$user->id">
+                        {{-- Avatar, name and email in one cell: one identity, one column. --}}
+                        <flux:table.cell>
+                            <div class="flex items-center gap-3">
                                 <flux:avatar
                                     circle
-                                    size="lg"
+                                    size="sm"
                                     :name="$user->name"
                                     :initials="$user->initials()"
                                     :src="$user->avatarUrl()"
-                                    class="h-12 w-12 text-sm leading-none ring-1 ring-zinc-200 dark:ring-zinc-700"
                                 />
-                            </flux:table.cell>
-                            <flux:table.cell class="font-medium leading-6">
-                                @can('view', $user)
-                                    <flux:link href="{{ route(config('user-management.routes.names.users.show', 'admin.users.show'), $user) }}" wire:navigate class="leading-6 text-zinc-900 dark:text-zinc-100 hover:text-zinc-900 dark:text-zinc-100">{{ $user->name }}</flux:link>
-                                @else
-                                    <span class="leading-6 text-zinc-900 dark:text-zinc-100">{{ $user->name }}</span>
-                                @endcan
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                <flux:text class="text-sm leading-6 text-zinc-900 dark:text-zinc-100/60">{{ $user->email }}</flux:text>
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                <div class="flex flex-wrap gap-2">
-                                    @forelse ($user->roles as $role)
-                                        @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
-                                        <span class="inline-flex items-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-2.5 py-1 text-xs font-medium leading-none ring-1 ring-zinc-200 dark:ring-zinc-700">
-                                            {{ $enum?->label() ?? $role->name }}
-                                        </span>
-                                    @empty
-                                        <flux:text class="text-xs leading-5 text-zinc-900 dark:text-zinc-100/40">{{ __('No Roles') }}</flux:text>
-                                    @endforelse
+                                <div class="min-w-0">
+                                    @can('view', $user)
+                                        <flux:link
+                                            href="{{ route(config('user-management.routes.names.users.show', 'admin.users.show'), $user) }}"
+                                            wire:navigate
+                                            class="block truncate font-medium"
+                                        >{{ $user->name }}</flux:link>
+                                    @else
+                                        <span class="block truncate font-medium">{{ $user->name }}</span>
+                                    @endcan
+                                    <flux:text size="sm" variant="subtle" class="block truncate">{{ $user->email }}</flux:text>
                                 </div>
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                @if ($user->is_active)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:text-emerald-400 ring-emerald-500/20 px-2.5 py-1 text-xs font-medium leading-none ring-1 ring-emerald-500/20">{{ __('Active') }}</span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100/60 px-2.5 py-1 text-xs font-medium leading-none">{{ __('Inactive') }}</span>
-                                @endif
-                            </flux:table.cell>
-                            <flux:table.cell>
-                                @if ($user->last_login_at)
-                                    <flux:text class="text-sm leading-6 text-zinc-900 dark:text-zinc-100/60">{{ $user->last_login_at->diffForHumans() }}</flux:text>
-                                @else
-                                    <flux:text class="text-sm leading-6 text-zinc-900 dark:text-zinc-100/40">{{ __('Never') }}</flux:text>
-                                @endif
-                            </flux:table.cell>
-                            <flux:table.cell class="text-right">
-                                <flux:dropdown>
-                                    <flux:button icon="ellipsis-vertical" variant="ghost" size="sm" class="leading-6" />
+                            </div>
+                        </flux:table.cell>
 
-                                    <flux:menu class="min-w-[200px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[var(--radius-lg)]">
-                                        <div class="flex items-center gap-2 p-2">
-                                            @can('view', $user)
-                                                <flux:menu.item class="flex-1 justify-center leading-5" href="{{ route(config('user-management.routes.names.users.show', 'admin.users.show'), $user) }}" icon="eye" wire:navigate>{{ __('View') }}</flux:menu.item>
-                                            @endcan
-                                            @can('update', $user)
-                                                <flux:menu.item class="flex-1 justify-center leading-5" href="{{ route(config('user-management.routes.names.users.edit', 'admin.users.edit'), $user) }}" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:menu.item>
-                                            @endcan
-                                        </div>
-                                        @can('delete', $user)
-                                            <flux:menu.separator class="bg-zinc-100 dark:bg-zinc-800" />
-                                            <flux:menu.item class="leading-5 text-red-600 dark:text-red-400 hover:text-red-700" wire:click="confirmDelete({{ $user->id }})" icon="trash" variant="danger" data-test="delete-user-{{ $user->id }}">{{ __('Delete') }}</flux:menu.item>
-                                        @endcan
-                                    </flux:menu>
-                                </flux:dropdown>
-                            </flux:table.cell>
-                        </flux:table.row>
-                    @endforeach
-                </flux:table.rows>
-            </flux:table>
-        </div>
+                        <flux:table.cell>
+                            <div class="flex flex-wrap gap-1">
+                                @forelse ($user->roles as $role)
+                                    <x-user-management::role-badge :role="$role" wire:key="role-{{ $user->id }}-{{ $role->id }}" />
+                                @empty
+                                    <flux:text size="sm" variant="subtle">{{ __('No roles') }}</flux:text>
+                                @endforelse
+                            </div>
+                        </flux:table.cell>
+
+                        <flux:table.cell>
+                            <x-user-management::status-badge :active="$user->is_active" />
+                        </flux:table.cell>
+
+                        <flux:table.cell>
+                            @if ($user->last_login_at)
+                                <flux:tooltip :content="$user->last_login_at->toDayDateTimeString()">
+                                    <flux:text size="sm" variant="subtle">{{ $user->last_login_at->diffForHumans() }}</flux:text>
+                                </flux:tooltip>
+                            @else
+                                <flux:text size="sm" variant="subtle">{{ __('Never') }}</flux:text>
+                            @endif
+                        </flux:table.cell>
+
+                        <flux:table.cell align="end">
+                            <flux:dropdown position="bottom" align="end">
+                                <flux:button icon="ellipsis-horizontal" variant="subtle" size="sm" />
+
+                                <flux:menu>
+                                    @can('view', $user)
+                                        <flux:menu.item
+                                            href="{{ route(config('user-management.routes.names.users.show', 'admin.users.show'), $user) }}"
+                                            icon="eye"
+                                            wire:navigate
+                                        >{{ __('View') }}</flux:menu.item>
+                                    @endcan
+                                    @can('update', $user)
+                                        <flux:menu.item
+                                            href="{{ route(config('user-management.routes.names.users.edit', 'admin.users.edit'), $user) }}"
+                                            icon="pencil-square"
+                                            wire:navigate
+                                        >{{ __('Edit') }}</flux:menu.item>
+                                    @endcan
+                                    @can('delete', $user)
+                                        <flux:menu.separator />
+                                        <flux:menu.item
+                                            wire:click="confirmDelete({{ $user->id }})"
+                                            icon="trash"
+                                            variant="danger"
+                                            data-test="delete-user-{{ $user->id }}"
+                                        >{{ __('Delete') }}</flux:menu.item>
+                                    @endcan
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
     @endif
 
     <flux:modal name="confirm-delete-user" class="md:w-96">
-        <div class="space-y-6 p-2">
-            <flux:heading size="lg" class="leading-7 text-zinc-900 dark:text-zinc-100">{{ __('Delete User?') }}</flux:heading>
-            <flux:text class="leading-6 text-zinc-900 dark:text-zinc-100/60">{{ __('This action cannot be undone. The user will be permanently removed from the system.') }}</flux:text>
-            <div class="flex gap-3 justify-end">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Delete user?') }}</flux:heading>
+                <flux:text variant="subtle" class="mt-2">
+                    {{ __('They will lose access immediately. This cannot be undone from the interface.') }}
+                </flux:text>
+            </div>
+
+            <div class="flex justify-end gap-2">
                 <flux:modal.close>
-                    <flux:button variant="ghost" class="leading-6">{{ __('Cancel') }}</flux:button>
+                    <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                 </flux:modal.close>
-                <flux:button variant="danger" wire:click="delete" icon="trash" class="leading-6 rounded-[var(--radius-md)]">{{ __('Delete User') }}</flux:button>
+                <flux:button variant="danger" wire:click="delete" icon="trash">{{ __('Delete user') }}</flux:button>
             </div>
         </div>
     </flux:modal>

@@ -1,9 +1,9 @@
-<x-layouts::auth :title="__('Register')">
+<x-dynamic-component :component="config('user-management.layouts.auth', 'layouts.auth')" :title="__('Register')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <x-user-management::auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
         <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+        <x-user-management::auth-session-status class="text-center" :status="session('status')" />
 
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
@@ -38,7 +38,7 @@
                 required
                 autocomplete="new-password"
                 :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                
                 viewable
             />
 
@@ -50,7 +50,7 @@
                 required
                 autocomplete="new-password"
                 :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                
                 viewable
             />
 
@@ -66,4 +66,4 @@
             <flux:link :href="route(config('user-management.routes.names.login', 'login'))" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>
     </div>
-</x-layouts::auth>
+</x-dynamic-component>

@@ -137,6 +137,7 @@ class UserRepository implements UserContract
 
     /**
      * Get active count from a paginated result (to avoid extra query).
+     *
      * @deprecated count via paginator no longer uses withCount; use activeCount()
      */
     public function activeCountFromPaginator(LengthAwarePaginator $paginator): int

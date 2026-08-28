@@ -3,14 +3,14 @@
 namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Kreetancraft\UserManagement\Actions\CreatePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeletePermissionAction;
 use Kreetancraft\UserManagement\Actions\DeleteRoleAction;
 use Kreetancraft\UserManagement\Models\User;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 use RuntimeException;
 use SanderMuller\FluentValidation\FluentRule as Rule;
 use Spatie\Permission\Models\Permission;
@@ -135,7 +135,7 @@ class ManageRoles extends Component
     #[Title('Roles & Permissions - Admin')]
     public function render()
     {
-        $layout = config('user-management.layouts.admin', 'layouts.app');
+        $layout = config('user-management.layouts.admin', 'components.layouts.app');
 
         $roles = Role::with('permissions')
             ->where('name', 'like', '%'.$this->searchRoles.'%')

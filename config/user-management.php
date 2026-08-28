@@ -48,6 +48,11 @@ return [
         'security_edit' => null, // optional link to security settings page
         'names' => [
             'dashboard' => 'dashboard',
+
+            // Route name of YOUR page where a user enables 2FA. Required only when
+            // features.two_factor is on and you enforce it per-user.
+            'security_edit' => null,
+
             'users' => [
                 'index' => 'admin.users',
                 'create' => 'admin.users.create',
@@ -88,9 +93,16 @@ return [
     | Layouts
     |--------------------------------------------------------------------------
     */
+    // This package ships no layouts and no CSS: it renders into YOUR layout
+    // and inherits your Tailwind/Flux theme. Defaults match a stock Laravel
+    // starter kit; point them at whatever your app actually uses.
     'layouts' => [
-        'admin' => 'layouts.app',
-        'auth' => 'user-management::layouts.auth',
+        'admin' => 'components.layouts.app',
+        // NOTE the asymmetry, which is Laravel's not ours: the admin screens are
+        // Livewire pages and ->layout() wants a VIEW name, while the Fortify auth
+        // screens are plain Blade wrapped in <x-dynamic-component>, which wants a
+        // COMPONENT name. Same file on disk, two ways of naming it.
+        'auth' => 'layouts.auth',
     ],
 
     /*
@@ -107,6 +119,10 @@ return [
         'case' => 'kebab',
         'methods' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
         'custom' => ['manage-roles', 'manage-permissions', 'view-users', 'create-users', 'edit-users', 'delete-users'],
+
+        // Permission names the UI refuses to delete, on top of this package's
+        // own. Add yours here so an admin cannot lock themselves out.
+        'protected' => [],
     ],
 
     /*
@@ -125,4 +141,40 @@ return [
     |--------------------------------------------------------------------------
     */
     'invitation_expiry_hours' => 48,
+    /*
+    |--------------------------------------------------------------------------
+    | UI Colours
+    |--------------------------------------------------------------------------
+    |
+    | Global colour configuration for every badge and accent this package
+    | renders. Buttons and links use `variant="primary"`, which follows the
+    | host application's Flux accent colour automatically — set that in your
+    | app's CSS (`--color-accent`) and this package follows along.
+    |
+    | Roles are created at runtime, so their colours cannot be configured one
+    | by one. Instead a colour is picked deterministically from `role_palette`
+    | using a hash of the role name: the same role always gets the same colour,
+    | and no two deployments need to agree on anything. Reorder, extend or
+    | shrink the palette to match your brand — a single-entry palette makes
+    | every role one colour.
+    |
+    | Any Flux badge colour is valid: zinc, red, orange, amber, yellow, lime,
+    | green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia,
+    | pink, rose.
+    |
+    */
+    'ui' => [
+        'role_palette' => [
+            'blue', 'emerald', 'violet', 'amber', 'cyan',
+            'pink', 'lime', 'indigo', 'teal', 'orange',
+        ],
+
+        // Reserved so elevated access always reads the same way.
+        'super_admin_color' => 'red',
+
+        'status' => [
+            'active' => 'emerald',
+            'inactive' => 'zinc',
+        ],
+    ],
 ];

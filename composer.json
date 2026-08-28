@@ -2,7 +2,16 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "kreetancraft/laravel-user-management",
     "description": "Complete user management for Laravel — Livewire 4 + Flux UI, Fortify 2FA/passkeys, roles & permissions, impersonation, login history.",
-    "keywords": ["laravel", "livewire", "flux", "user-management", "roles", "permissions", "fortify", "blade"],
+    "keywords": [
+        "laravel",
+        "livewire",
+        "flux",
+        "user-management",
+        "roles",
+        "permissions",
+        "fortify",
+        "blade"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -44,7 +53,8 @@
     "autoload-dev": {
         "psr-4": {
             "Kreetancraft\\UserManagement\\Tests\\": "tests/",
-            "Kreetancraft\\UserManagement\\Database\\Factories\\": "database/factories/"
+            "Kreetancraft\\UserManagement\\Database\\Factories\\": "database/factories/",
+            "Kreetancraft\\UserManagement\\Tests\\Fixtures\\": "tests/fixtures/"
         }
     },
     "extra": {

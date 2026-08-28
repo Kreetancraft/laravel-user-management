@@ -8,7 +8,7 @@
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ $user->name }}</flux:heading>
+                <flux:heading size="xl" level="1">{{ $user->name }}</flux:heading>
                 <flux:subheading>
                     {{ $user->email }}
                     @if ($user->last_login_at)
@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {{-- Left Column: User Profile Summary --}}
         <div class="lg:col-span-1 space-y-12">
-            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs overflow-hidden">
+            <flux:card class="overflow-hidden p-0">
                 <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center space-y-4">
                     <flux:avatar
                         circle
@@ -49,17 +49,14 @@
 
                     <div>
                         <flux:heading size="lg">{{ $user->name }}</flux:heading>
-                        <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ $user->email }}</flux:text>
+                        <flux:text size="sm" variant="subtle">{{ $user->email }}</flux:text>
                     </div>
 
                     <div class="flex flex-wrap justify-center gap-1.5">
                         @forelse ($user->roles as $role)
-                            @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
-                            <flux:badge size="sm" color="{{ $enum?->color() ?? 'zinc' }}">
-                                {{ $enum?->label() ?? $role->name }}
-                            </flux:badge>
+                            <x-user-management::role-badge :role="$role" wire:key="role-{{ $role->id }}" />
                         @empty
-                            <flux:badge size="sm" color="zinc">{{ __('No Roles') }}</flux:badge>
+                            <flux:text size="sm" variant="subtle">{{ __('No roles assigned') }}</flux:text>
                         @endforelse
 
                         @if ($user->is_active)
@@ -72,17 +69,17 @@
 
                 <div class="p-6 space-y-4 text-sm">
                     <div class="flex justify-between items-center">
-                        <flux:text class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Account Created') }}</flux:text>
-                        <flux:text class="text-zinc-900 dark:text-zinc-100 font-semibold">{{ $user->created_at->format('M d, Y') }}</flux:text>
+                        <flux:text variant="subtle" class="font-medium">{{ __('Account Created') }}</flux:text>
+                        <flux:text class="font-semibold">{{ $user->created_at->format('M d, Y') }}</flux:text>
                     </div>
 
                     <div class="flex justify-between items-center">
-                        <flux:text class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Last Login IP') }}</flux:text>
-                        <flux:text class="text-zinc-900 dark:text-zinc-100 font-mono font-semibold">{{ $user->last_login_ip ?? __('N/A') }}</flux:text>
+                        <flux:text variant="subtle" class="font-medium">{{ __('Last Login IP') }}</flux:text>
+                        <flux:text class="font-mono font-semibold">{{ $user->last_login_ip ?? __('N/A') }}</flux:text>
                     </div>
 
                     <div class="flex justify-between items-center">
-                        <flux:text class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('2FA Enabled') }}</flux:text>
+                        <flux:text variant="subtle" class="font-medium">{{ __('2FA Enabled') }}</flux:text>
                         @if ($user->hasEnabledTwoFactorAuthentication())
                             <flux:badge size="sm" color="green">{{ __('Yes') }}</flux:badge>
                         @else
@@ -90,15 +87,15 @@
                         @endif
                     </div>
                 </div>
-            </div>
+            </flux:card>
         </div>
 
         {{-- Right Column: Login History --}}
         <div class="lg:col-span-2 space-y-12">
-            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
+            <flux:card class="p-0">
                 <div class="p-6 border-b border-zinc-100 dark:border-zinc-800">
                     <flux:heading size="lg">{{ __('Login History') }}</flux:heading>
-                    <flux:text class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    <flux:text size="sm" variant="subtle" class="mt-1">
                         {{ __('A registry of recent successful login events for this account.') }}
                     </flux:text>
                 </div>
@@ -106,7 +103,7 @@
                 <div class="p-0">
                     @if ($history->isEmpty())
                         <div class="p-12 text-center">
-                            <flux:text class="text-zinc-400 dark:text-zinc-500">{{ __('No login logs found for this user.') }}</flux:text>
+                            <flux:text variant="subtle">{{ __('No login logs found for this user.') }}</flux:text>
                         </div>
                     @else
                         <flux:table>
@@ -122,15 +119,15 @@
                                     <flux:table.row :key="$log->id">
                                         <flux:table.cell class="whitespace-nowrap">
                                             <div class="flex flex-col">
-                                                <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                                                <span class="font-medium">
                                                     {{ $log->created_at->format('M d, Y H:i:s') }}
                                                 </span>
-                                                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                                                <span class="text-xs opacity-70">
                                                     {{ $log->created_at->diffForHumans() }}
                                                 </span>
                                             </div>
                                         </flux:table.cell>
-                                        <flux:table.cell class="font-mono text-zinc-900 dark:text-zinc-100 font-medium">
+                                        <flux:table.cell class="font-mono font-medium">
                                             {{ $log->ip_address }}
                                         </flux:table.cell>
                                         <flux:table.cell>
@@ -138,17 +135,17 @@
                                                 <span class="text-lg" title="{{ $log->country_code ?? 'Unknown' }}">
                                                     {{ $log->country_flag }}
                                                 </span>
-                                                <span class="text-zinc-900 dark:text-zinc-100 font-medium">
+                                                <span class="font-medium">
                                                     {{ $log->formatted_location }}
                                                 </span>
                                             </div>
                                         </flux:table.cell>
                                         <flux:table.cell>
                                             <div class="flex flex-col text-sm">
-                                                <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                                                <span class="font-medium">
                                                     {{ $log->browser }}
                                                 </span>
-                                                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                                                <span class="text-xs opacity-70">
                                                     {{ $log->platform }}
                                                 </span>
                                             </div>
@@ -163,7 +160,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </flux:card>
         </div>
     </div>
 </div>

@@ -2,37 +2,11 @@
 
 namespace Kreetancraft\UserManagement\Contracts;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Kreetancraft\UserManagement\Data\StoreUserData;
-use Kreetancraft\UserManagement\Data\UpdateUserData;
-use Kreetancraft\UserManagement\Models\User;
-
-interface UserContract
-{
-    public function createWithInvitation(StoreUserData $data): User;
-
-    public function update(User $user, UpdateUserData $data): User;
-
-    public function delete(User $user): void;
-
-    public function setPasswordFromInvitation(User $user, string $password): void;
-
-    public function refreshInvitation(User $user): void;
-
-    /**
-     * @return LengthAwarePaginator<int, User>
-     */
-    public function paginated(
-        ?string $search,
-        ?string $role,
-        ?string $status,
-        ?string $sort = 'name',
-        int $perPage = 15
-    ): LengthAwarePaginator;
-
-    public function activeCount(): int;
-
-    public function findByInvitationToken(string $token): ?User;
-
-    public function find(int $id): ?User;
-}
+/**
+ * Both sides of user persistence.
+ *
+ * Depend on this only where a class genuinely needs to read *and* write —
+ * completing an invitation, for example. Everywhere else prefer the narrower
+ * ManagesUsers or QueriesUsers.
+ */
+interface UserContract extends ManagesUsers, QueriesUsers {}

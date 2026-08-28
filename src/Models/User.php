@@ -2,8 +2,6 @@
 
 namespace Kreetancraft\UserManagement\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,12 +16,11 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'is_active', 'enforce_2fa', 'invitation_token', 'invitation_sent_at'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasRoles;
     use Impersonate;
     use Notifiable;
@@ -42,6 +39,19 @@ class User extends Authenticatable implements PasskeyUser
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
+    ];
+
+    /**
+     * Declared as arrays rather than the #[Fillable]/#[Hidden] attributes:
+     * those are Laravel 13+ only, and this package supports ^12 as well,
+     * where the attributes are silently ignored and leave the model totally
+     * guarded.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name', 'email', 'password', 'is_active', 'enforce_2fa',
+        'invitation_token', 'invitation_sent_at',
     ];
 
     /**

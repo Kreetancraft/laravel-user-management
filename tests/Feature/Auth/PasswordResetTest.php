@@ -2,8 +2,8 @@
 
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
-use Laravel\Fortify\Features;
 use Kreetancraft\UserManagement\Models\User;
+use Laravel\Fortify\Features;
 
 beforeEach(function () {
     $this->skipUnlessFortifyHas(Features::resetPasswords());

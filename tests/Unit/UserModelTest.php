@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Auth\Events\Login;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Listeners\RecordUserLogin;
 use Kreetancraft\UserManagement\Models\User;
 
@@ -26,16 +25,16 @@ test('initials caps at two letters for long names', function () {
 
 test('isSuperAdmin returns true only for users with the super-admin role', function () {
     $superAdmin = User::factory()->superAdmin()->create();
-    $bookingManager = User::factory()->bookingManager()->create();
+    $bookingManager = User::factory()->withRole('manager')->create();
 
     expect($superAdmin->isSuperAdmin())->toBeTrue()
         ->and($bookingManager->isSuperAdmin())->toBeFalse();
 });
 
 test('primaryRole returns the user role enum', function () {
-    $user = User::factory()->packageManager()->create();
+    $user = User::factory()->withRole('editor')->create();
 
-    expect($user->primaryRole())->toBe(UserRole::PackageManager->value);
+    expect($user->primaryRole())->toBe('editor');
 });
 
 test('primaryRole returns null for a user without roles', function () {
@@ -53,10 +52,10 @@ test('active scope only returns active users', function () {
 
 test('withRole scope filters by enum', function () {
     User::factory()->superAdmin()->create();
-    User::factory()->bookingManager()->count(2)->create();
+    User::factory()->withRole('manager')->count(2)->create();
 
-    expect(User::withRole(UserRole::BookingManager->value)->count())->toBe(2)
-        ->and(User::withRole(UserRole::SuperAdmin->value)->count())->toBe(1);
+    expect(User::withRole('manager')->count())->toBe(2)
+        ->and(User::withRole(User::superAdminRole())->count())->toBe(1);
 });
 
 test('soft delete keeps the user discoverable via withTrashed', function () {

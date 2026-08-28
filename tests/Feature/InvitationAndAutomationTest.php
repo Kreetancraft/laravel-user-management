@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
-use Laravel\Fortify\Features;
 use Kreetancraft\UserManagement\Actions\CreateUserAction;
 use Kreetancraft\UserManagement\Actions\DeactivateUserAction;
 use Kreetancraft\UserManagement\Actions\DeleteUserAction;
@@ -13,14 +12,17 @@ use Kreetancraft\UserManagement\Actions\UpdateUserAction;
 use Kreetancraft\UserManagement\Contracts\UserContract;
 use Kreetancraft\UserManagement\Data\StoreUserData;
 use Kreetancraft\UserManagement\Data\UpdateUserData;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Events\UserDeactivated;
+use Kreetancraft\UserManagement\Events\UserInvited;
+use Kreetancraft\UserManagement\Exceptions\CannotDeleteLastSuperAdmin;
+use Kreetancraft\UserManagement\Exceptions\CannotDeleteOwnAccount;
 use Kreetancraft\UserManagement\Livewire\EditUser;
 use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Notifications\AccountCreated;
 use Kreetancraft\UserManagement\Notifications\Invitation;
 use Kreetancraft\UserManagement\Notifications\UserDeactivated as UserDeactivatedNotification;
-use Spatie\Activitylog\Models\Activity;
+use Laravel\Fortify\Features;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -102,7 +104,7 @@ test('deactivating a user dispatches UserDeactivated and notifies them', functio
 test('deactivating via the edit form fires UserDeactivated', function () {
     Event::fake();
 
-    $target = User::factory()->bookingManager()->create(['is_active' => true]);
+    $target = User::factory()->withRole('manager')->create(['is_active' => true]);
     actingAsSuperAdmin();
 
     Livewire::test(EditUser::class, ['user' => $target])
@@ -139,7 +141,7 @@ test('UpdateUserAction persists changes through the repository transaction', fun
 });
 
 test('DeleteUserAction soft-deletes and detaches roles', function () {
-    $target = User::factory()->bookingManager()->create();
+    $target = User::factory()->withRole('manager')->create();
 
     DeleteUserAction::run($target);
 
@@ -214,20 +216,26 @@ test('a user with enforce_2fa and 2FA enrolled passes the gate', function () {
 test('a user cannot delete their own account', function () {
     $admin = actingAsSuperAdmin();
 
-    expect(Gate::forUser($admin)->check('delete', $admin))->toBeFalse();
+    // Enforced in the action, not the policy: super admins bypass policies
+    // via Gate::before, so a policy check would never run for them.
+    expect(fn () => DeleteUserAction::run($admin))
+        ->toThrow(CannotDeleteOwnAccount::class);
 });
 
-test('the last super-admin cannot be deleted (policy)', function () {
+test('the last super-admin cannot be deleted', function () {
     $admin = actingAsSuperAdmin();
+    $other = User::factory()->create();
+    $this->actingAs($other);
 
-    expect(Gate::forUser($admin)->check('delete', $admin))->toBeFalse();
+    expect(fn () => DeleteUserAction::run($admin))
+        ->toThrow(CannotDeleteLastSuperAdmin::class);
 });
 
 test('non-super-admins cannot assign the super-admin role', function () {
-    $user = User::factory()->bookingManager()->create();
+    $user = User::factory()->withRole('manager')->create();
     $this->actingAs($user);
 
-    expect(Gate::forUser($user)->check('assignRole', [User::class, UserRole::SuperAdmin]))
+    expect(Gate::forUser($user)->check('assignRole', [User::class, User::superAdminRole()]))
         ->toBeFalse();
 });
 
@@ -235,7 +243,7 @@ test('assigning super-admin role is allowed for super-admins', function () {
     $admin = actingAsSuperAdmin();
     $other = User::factory()->create();
 
-    expect(Gate::forUser($admin)->check('assignRole', [User::class, UserRole::SuperAdmin]))
+    expect(Gate::forUser($admin)->check('assignRole', [User::class, User::superAdminRole()]))
         ->toBeTrue();
 });
 
@@ -243,17 +251,17 @@ test('assigning super-admin role is allowed for super-admins', function () {
 // Activity log
 // -------------------------------------------------------------------
 
-test('creating a user writes an activity log entry', function () {
-    $admin = actingAsSuperAdmin();
+test('creating a user dispatches UserInvited for an audit listener to consume', function () {
+    Event::fake([UserInvited::class]);
+    actingAsSuperAdmin();
 
     $user = CreateUserAction::run(new StoreUserData(
         name: 'Logged User',
         email: 'logged@example.com',
     ));
 
-    $entry = Activity::forSubject($user)->get()->last();
-    expect($entry)->not->toBeNull()
-        ->and($entry->description)->toContain('invited');
+    // This package logs nothing itself; it emits events instead.
+    Event::assertDispatched(UserInvited::class, fn ($e) => $e->user->is($user));
 });
 
 // -------------------------------------------------------------------

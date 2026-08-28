@@ -1,30 +1,60 @@
 # kreetancraft/laravel-user-management
 
-Complete user management for Laravel — **Livewire 4 + Flux UI**, **Laravel Fortify** (2FA, passkeys, email verification), **roles & permissions** (spatie/laravel-permission), **impersonation**, and **login history with GeoIP**.
+Users, roles and permissions for Laravel — **Livewire 4 + Flux UI**, **Fortify** (2FA, passkeys,
+email verification, password reset), **spatie/laravel-permission**, **impersonation**, and
+**login history**.
 
-Standalone package — no `nwidart/laravel-modules`. Drops into any Laravel 12/13 app (including `laravel new --using=livewire` starter kit).
+Standalone package. No `nwidart/laravel-modules`, no bundled CSS, no bundled layouts.
 
-> **Flux is a hard dependency.** All admin views use `<flux:*>` 200+ times. Consumers must have `livewire/flux` installed (paid).
+## Design decisions worth knowing before you install
+
+**It ships no CSS and no layouts.** The admin screens render into *your* layout and inherit your
+Tailwind + Flux theme. Buttons use `variant="primary"`, so they follow your Flux accent colour
+automatically. You must provide the two layouts named in `config('user-management.layouts')`.
+
+**It seeds nothing but the super admin.** Permissions are *generated* from your policies by
+`user-management:sync-permissions`; roles are created at runtime through the UI by the super
+admin. This follows Filament Shield's model. Nothing in the package assumes anything about your
+application's domain.
+
+**It logs nothing.** There is no audit trail here. Instead it emits domain events — `UserCreated`,
+`UserInvited`, `UserUpdated`, `UserDeleted`, `UserDeactivated`, `RoleCreated` — for an audit
+package to subscribe to.
+
+**It handles no images.** There are no avatars and no media library. `User::avatarUrl()` returns
+`null` and is the extension point: override it on a subclass and the views pick it up.
+
+> **Flux is a hard dependency.** Every admin screen uses `<flux:*>`. The package uses only free-tier
+> Flux components, but `livewire/flux` must be installed.
 
 ## Requirements
 
 - PHP `^8.2`, Laravel `^12|^13`
 - `livewire/livewire ^4`, `livewire/flux ^2`, `laravel/fortify ^1.37`
 - `spatie/laravel-permission ^8`, `spatie/laravel-data ^4`, `spatie/laravel-query-builder ^7`
-- `lab404/laravel-impersonate ^1.7` and `torann/geoip ^3.0` are **required** (installed with this package)
+- `lorisleiva/laravel-actions`, `sandermuller/laravel-fluent-validation`
+
+Optional, enabled per feature flag: `lab404/laravel-impersonate`, `torann/geoip`.
 
 ## Installation
 
 ```bash
 composer require kreetancraft/laravel-user-management
+```
+```bash
 php artisan vendor:publish --tag=user-management-config
-php artisan vendor:publish --tag=user-management-migrations
+```
+```bash
 php artisan migrate
+```
+```bash
 php artisan user-management:super-admin
+```
+```bash
 php artisan user-management:sync-permissions
 ```
 
-### Point auth to the package User (optional)
+### Point auth at the package's User model
 
 In `config/auth.php`:
 
@@ -37,58 +67,111 @@ In `config/auth.php`:
 ],
 ```
 
-Or extend it in your app:
+Or extend it, which is how you add avatars or your own relations:
 
 ```php
 class User extends \Kreetancraft\UserManagement\Models\User {}
 ```
 
-## Features
+### Provide the layouts
 
-- **Users:** CRUD, soft-delete, invitation flow (`/set-password/{token}` with 48h expiry + `throttle:6,1`), active/inactive, `enforce_2fa`
-- **Roles & Permissions:** Livewire `ManageRoles` / `CreateRole` / `EditRole` + permission CRUD, seeded via `user-management:sync-permissions`
-- **Auth:** Fortify views at `user-management::auth.*`, 2FA challenge, passkeys, password reset, email verification
-- **Login history:** `user_login_histories` table, `RecordUserLogin` listener with GeoIP enrichment
-- **Impersonation:** `Route::impersonate()` via `lab404/laravel-impersonate`, super-admin only (`canImpersonate` / `canBeImpersonated`)
-- **UI:** 8 Livewire components, Flux tables/badges/modals, layouts `user-management::layouts.app` / `auth`
+Defaults match a stock Laravel starter kit. Note the asymmetry — it is Laravel's, not ours: the
+admin screens are Livewire pages and `->layout()` takes a **view** name, while the Fortify auth
+screens are plain Blade wrapped in `<x-dynamic-component>`, which takes a **component** name.
+
+```php
+'layouts' => [
+    'admin' => 'components.layouts.app', // view name
+    'auth'  => 'layouts.auth',           // component name
+],
+```
 
 ## Configuration
 
-`config/user-management.php` (publishable):
+`config/user-management.php`:
 
 ```php
-'super_admin' => ['role' => 'super-admin'],
-'features' => ['two_factor' => true, 'passkeys' => true, 'impersonation' => true, 'login_history' => true],
-'routes' => ['prefix' => 'admin', 'middleware' => ['web','auth','verified','ensure.2fa.enforced']],
-'views' => ['login' => 'user-management::auth.login', /* ... */],
-'layouts' => ['admin' => 'user-management::layouts.app', 'auth' => 'user-management::layouts.auth'],
+'super_admin' => ['role' => 'super-admin', 'enabled' => true],
+
+'features' => [
+    'two_factor' => true, 'passkeys' => true,
+    'impersonation' => true, 'login_history' => true,
+    'registration' => false,
+],
+
+// Colours. Roles are runtime rows, so a colour is chosen by hashing the role
+// name against this palette — stable everywhere, nothing to configure per role.
+'ui' => [
+    'role_palette' => ['blue', 'emerald', 'violet', 'amber', 'cyan', 'pink', 'lime', 'indigo', 'teal', 'orange'],
+    'super_admin_color' => 'red',
+    'status' => ['active' => 'emerald', 'inactive' => 'zinc'],
+],
+
+'routes' => [
+    'prefix' => 'admin',
+    'middleware' => ['web', 'auth', 'verified', 'ensure.2fa.enforced'],
+    'names' => [
+        // Required only if you enforce 2FA per user: the route where they enable it.
+        'security_edit' => null,
+    ],
+],
+
+'permissions' => ['protected' => []], // your permission names the UI must refuse to delete
 'invitation_expiry_hours' => 48,
 ```
 
-All view/layout/route names are overridable so a host app can point at its own.
+Every view, layout and route name is overridable.
+
+## Features
+
+- **Users** — CRUD, soft deletes, active/inactive, `enforce_2fa` per user
+- **Invitations** — invite by email, user sets their own password at `/set-password/{token}`;
+  tokens are single-use, expire after `invitation_expiry_hours`, and the route is throttled
+- **Roles & permissions** — full runtime CRUD; permissions generated from your policies
+- **Auth** — Fortify-backed 2FA (TOTP + recovery codes), passkeys, password reset, email
+  verification, with dedicated rate limiters for login / two-factor / passkeys
+- **Login history** — IP, user agent, derived browser and platform, optional GeoIP country
+- **Impersonation** — super admin only, double-gated
 
 ## Commands
 
-- `php artisan user-management:super-admin {--user=}` — create or promote a super-admin (prohibited in production)
-- `php artisan user-management:sync-permissions` — scan policy paths and upsert permissions per policy method (idempotent)
+```bash
+php artisan user-management:super-admin
+```
+Creates or promotes a super admin. Prohibited in production.
 
-## Migrations
+```bash
+php artisan user-management:sync-permissions
+```
+Scans the configured policy paths and upserts a permission per policy method. Idempotent — safe
+to run on every deploy.
 
-Publish and run:
+## Architecture
 
-- `create_users_table` (adds `invitation_token`, `invitation_sent_at`, `enforce_2fa`, `is_active`, `last_login_at`, `last_login_ip`)
-- `create_permission_tables` (spatie)
-- `create_passkeys_table` + `add_two_factor_columns_to_users_table`
-- `create_user_login_histories_table`
+Contracts are split so consumers depend only on what they use:
 
-The package does **not** re-create `password_reset_tokens` / `sessions` — those come from the Laravel skeleton.
+- `ManagesUsers` — the write side (create, update, delete, invitation)
+- `QueriesUsers` — the read side (pagination, lookups, counts)
+- `UserContract` — both, for the rare class that genuinely needs it
+- `RoleContract` — role and permission persistence
+
+All four are bound to the same repository, so you can replace one side without reimplementing
+the other.
+
+Two guards live in `DeleteUserAction` rather than `UserPolicy` — you cannot delete your own
+account, and you cannot delete the last super admin. That is deliberate: super admins bypass
+policies via `Gate::before`, so a policy check would never run for exactly the people able to
+trigger it.
 
 ## Testing
 
 ```bash
-composer install
 vendor/bin/pest
 ```
+
+The suite runs against `orchestra/testbench` on in-memory SQLite. `tests/fixtures/views` stands
+in for the host application's layouts, and `TestCase::defineRoutes()` provides the host routes
+the package references by configurable name.
 
 ## License
 

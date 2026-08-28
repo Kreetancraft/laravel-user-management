@@ -2,9 +2,9 @@
 
 namespace Kreetancraft\UserManagement\Actions;
 
+use Kreetancraft\UserManagement\Contracts\ManagesUsers;
 use Kreetancraft\UserManagement\Events\UserCreated;
 use Kreetancraft\UserManagement\Models\User;
-use Kreetancraft\UserManagement\Repositories\UserRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class SetUserPasswordAction
@@ -12,7 +12,7 @@ class SetUserPasswordAction
     use AsAction;
 
     public function __construct(
-        private UserRepository $users,
+        private ManagesUsers $users,
     ) {}
 
     /**

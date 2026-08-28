@@ -1,10 +1,10 @@
 <?php
 
-use Livewire\Livewire;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use Kreetancraft\UserManagement\Livewire\CreateRole;
 use Kreetancraft\UserManagement\Livewire\EditRole;
 use Kreetancraft\UserManagement\Livewire\ManageRoles;
+use Kreetancraft\UserManagement\Models\User;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -21,7 +21,7 @@ test('guests are redirected to login on role index', function () {
 });
 
 test('users without manage-roles permission are forbidden', function () {
-    actingAsRole(UserRole::BookingManager);
+    actingAsRole('manager');
 
     $this->get(route(config('user-management.routes.names.roles.index', 'admin.roles')))->assertForbidden();
 });
@@ -43,21 +43,21 @@ test('super admin creates a role with permissions', function () {
 
     Livewire::test(CreateRole::class)
         ->set('name', 'content-editor')
-        ->set('selectedPermissions', ['view-trips', 'edit-trips'])
+        ->set('selectedPermissions', ['view-users', 'edit-users'])
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route(config('user-management.routes.names.roles.index', 'admin.roles')));
 
     $role = Role::findByName('content-editor');
-    expect($role->hasPermissionTo('view-trips'))->toBeTrue()
-        ->and($role->hasPermissionTo('edit-trips'))->toBeTrue();
+    expect($role->hasPermissionTo('view-users'))->toBeTrue()
+        ->and($role->hasPermissionTo('edit-users'))->toBeTrue();
 });
 
 test('create role validates unique role name', function () {
     actingAsSuperAdmin();
 
     Livewire::test(CreateRole::class)
-        ->set('name', UserRole::PackageManager->value)
+        ->set('name', 'editor')
         ->call('save')
         ->assertHasErrors(['name']);
 });
@@ -77,10 +77,10 @@ test('create role requires a name', function () {
 
 test('edit role loads target data into the form', function () {
     actingAsSuperAdmin();
-    $role = Role::findByName(UserRole::PackageManager->value);
+    $role = Role::findByName(User::superAdminRole());
 
     Livewire::test(EditRole::class, ['role' => $role])
-        ->assertSet('name', UserRole::PackageManager->value)
+        ->assertSet('name', User::superAdminRole())
         ->assertViewHas('isSystemRole', true);
 });
 
@@ -89,17 +89,17 @@ test('edit role updates permissions', function () {
     $role = Role::create(['name' => 'custom-role']);
 
     Livewire::test(EditRole::class, ['role' => $role])
-        ->set('selectedPermissions', ['view-bookings'])
+        ->set('selectedPermissions', ['view-users'])
         ->call('save')
         ->assertHasNoErrors();
 
     $role->refresh();
-    expect($role->hasPermissionTo('view-bookings'))->toBeTrue();
+    expect($role->hasPermissionTo('view-users'))->toBeTrue();
 });
 
 test('edit role prevents renaming a system role', function () {
     actingAsSuperAdmin();
-    $role = Role::findByName(UserRole::PackageManager->value);
+    $role = Role::findByName(User::superAdminRole());
 
     Livewire::test(EditRole::class, ['role' => $role])
         ->set('name', 'something-else')
@@ -107,7 +107,7 @@ test('edit role prevents renaming a system role', function () {
         ->assertHasErrors(['name']);
 
     $role->refresh();
-    expect($role->name)->toBe(UserRole::PackageManager->value);
+    expect($role->name)->toBe(User::superAdminRole());
 });
 
 // -------------------------------------------------------------------
@@ -128,13 +128,13 @@ test('super admin can delete a non-system role', function () {
 
 test('system roles cannot be deleted', function () {
     actingAsSuperAdmin();
-    $role = Role::findByName(UserRole::SuperAdmin->value);
+    $role = Role::findByName(User::superAdminRole());
 
     Livewire::test(ManageRoles::class)
         ->call('confirmDeleteRole', $role->id)
         ->call('deleteRole');
 
-    $this->assertDatabaseHas('roles', ['name' => UserRole::SuperAdmin->value]);
+    $this->assertDatabaseHas('roles', ['name' => User::superAdminRole()]);
 });
 
 // -------------------------------------------------------------------

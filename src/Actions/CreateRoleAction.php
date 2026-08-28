@@ -2,8 +2,8 @@
 
 namespace Kreetancraft\UserManagement\Actions;
 
+use Kreetancraft\UserManagement\Contracts\RoleContract;
 use Kreetancraft\UserManagement\Events\RoleCreated;
-use Kreetancraft\UserManagement\Repositories\RoleRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Spatie\Permission\Models\Role;
 
@@ -12,7 +12,7 @@ class CreateRoleAction
     use AsAction;
 
     public function __construct(
-        private RoleRepository $roles,
+        private RoleContract $roles,
     ) {}
 
     /**

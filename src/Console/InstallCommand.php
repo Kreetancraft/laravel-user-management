@@ -52,11 +52,12 @@ class InstallCommand extends Command
         }
 
         if (! $sidebar || ! File::exists($sidebar)) {
-            $this->warn("Sidebar not found — skipping auto-inject. Add <x-user-management::nav /> manually to your layout.");
-            $this->line("Tried: ".implode(', ', $candidates));
+            $this->warn('Sidebar not found — skipping auto-inject. Add <x-user-management::nav /> manually to your layout.');
+            $this->line('Tried: '.implode(', ', $candidates));
             if ($found = $this->findSidebarByContent()) {
                 $this->line("Found candidate: {$found}");
             }
+
             return;
         }
 
@@ -64,6 +65,7 @@ class InstallCommand extends Command
 
         if (str_contains($content, 'user-management::nav') || str_contains($content, "route(config('user-management.routes.names.users.index', 'admin.users'))")) {
             $this->line('Sidebar already contains user-management nav — skipping.');
+
             return;
         }
 
@@ -109,6 +111,7 @@ class InstallCommand extends Command
                 }
             }
         }
+
         return null;
     }
 }

@@ -12,18 +12,22 @@ class DeletePermissionAction
     use AsAction;
 
     /**
-     * Core permissions that cannot be deleted.
+     * Permissions this package's own screens depend on.
      *
-     * @var array<string>
+     * Deleting one would lock an administrator out of the very interface
+     * used to restore it, so they are protected. Host applications add
+     * their own via the `permissions.protected` config key; nothing here
+     * assumes anything about the host's domain.
+     *
+     * @return list<string>
      */
-    private const PROTECTED = [
-        'view-users', 'create-users', 'edit-users', 'delete-users',
-        'manage-roles', 'manage-permissions',
-        'view-trips', 'create-trips', 'edit-trips', 'delete-trips', 'publish-trips',
-        'view-bookings', 'create-bookings', 'edit-bookings', 'cancel-bookings',
-        'view-payments', 'record-payments', 'issue-refunds', 'export-financials',
-        'view-inquiries', 'create-quotes', 'send-quotes',
-    ];
+    protected function protectedPermissions(): array
+    {
+        return array_values(array_unique(array_merge(
+            ['view-users', 'create-users', 'edit-users', 'delete-users', 'manage-roles', 'manage-permissions'],
+            (array) config('user-management.permissions.protected', []),
+        )));
+    }
 
     /**
      * Delete a permission.
@@ -32,7 +36,7 @@ class DeletePermissionAction
      */
     public function handle(Permission $permission): bool
     {
-        if (in_array($permission->name, self::PROTECTED, true)) {
+        if (in_array($permission->name, $this->protectedPermissions(), true)) {
             throw new RuntimeException("Core permission '{$permission->name}' cannot be deleted.");
         }
 

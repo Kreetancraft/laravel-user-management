@@ -2,17 +2,17 @@
 
 namespace Kreetancraft\UserManagement\Actions;
 
-use Lorisleiva\Actions\Concerns\AsAction;
+use Kreetancraft\UserManagement\Contracts\ManagesUsers;
 use Kreetancraft\UserManagement\Events\UserInvited;
 use Kreetancraft\UserManagement\Models\User;
-use Kreetancraft\UserManagement\Repositories\UserRepository;
+use Lorisleiva\Actions\Concerns\AsAction;
 
 class ResendInvitationAction
 {
     use AsAction;
 
     public function __construct(
-        private UserRepository $users,
+        private ManagesUsers $users,
     ) {}
 
     /**

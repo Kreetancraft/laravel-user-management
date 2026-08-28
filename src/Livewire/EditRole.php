@@ -3,10 +3,10 @@
 namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
+use Kreetancraft\UserManagement\Actions\UpdateRoleAction;
+use Kreetancraft\UserManagement\Support\RolePresenter;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Kreetancraft\UserManagement\Actions\UpdateRoleAction;
-use Kreetancraft\UserManagement\Enums\UserRole;
 use SanderMuller\FluentValidation\FluentRule as Rule;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -64,24 +64,20 @@ class EditRole extends Component
 
         Flux::toast(variant: 'success', text: __('Role updated successfully.'));
 
-        $this->redirect(route(config('user-management.routes.names.roles.index', 'admin.roles')), navigate: true);
+        $this->redirect(route('admin.roles'), navigate: true);
     }
 
-    #[Title('Edit Role - Admin')]
+    #[Title('Edit Role')]
     public function render()
     {
         return view('user-management::livewire.edit-role', [
             'permissions' => Permission::orderBy('name')->get(),
             'isSystemRole' => $this->isSystemRole(),
-        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
     }
 
     private function isSystemRole(): bool
     {
-        return in_array(
-            $this->role->name,
-            array_column(UserRole::cases(), 'value'),
-            true,
-        );
+        return in_array($this->role->name, RolePresenter::systemRoles(), true);
     }
 }

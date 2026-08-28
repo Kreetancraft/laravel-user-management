@@ -9,14 +9,13 @@
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div>
                 <div class="flex items-center gap-2">
-                    @php($enum = \Kreetancraft\UserManagement\Enums\UserRole::tryFrom($role->name))
-                    <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ $enum?->label() ?? $role->name }}</flux:heading>
+                    <flux:heading size="xl" level="1">{{ \Kreetancraft\UserManagement\Support\RolePresenter::label($role->name) }}</flux:heading>
                     @if ($isSystemRole)
                         <flux:badge size="sm" color="amber" icon="lock-closed">{{ __('System role') }}</flux:badge>
                     @endif
                 </div>
                 <flux:subheading>
-                    {{ $enum?->description() ?? __('Update the permissions granted by this role.') }}
+                    {{ __('Update the permissions granted by this role.') }}
                 </flux:subheading>
             </div>
             <div class="flex items-center gap-2">
@@ -37,7 +36,7 @@
                 <flux:card>
                     <div class="p-6 border-b border-zinc-100 dark:border-zinc-800">
                         <flux:heading size="lg">{{ __('Role Identity') }}</flux:heading>
-                        <flux:text class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        <flux:text size="sm" variant="subtle" class="mt-1">
                             @if ($isSystemRole)
                                 {{ __('Built-in system role — name is locked.') }}
                             @else
@@ -83,7 +82,7 @@
                     <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                         <div>
                             <flux:heading size="lg">{{ __('Permissions') }}</flux:heading>
-                            <flux:text class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            <flux:text size="sm" variant="subtle" class="mt-1">
                                 {{ __('Users with this role gain access to every permission checked below.') }}
                             </flux:text>
                         </div>
@@ -95,7 +94,7 @@
                             @foreach ($permissions as $permission)
                                 <label wire:key="perm-{{ $permission->id }}" class="flex items-center gap-3 p-3 rounded-md border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer transition">
                                     <flux:checkbox value="{{ $permission->name }}" />
-                                    <flux:icon icon="key" variant="mini" class="text-zinc-400 shrink-0" />
+                                    <flux:icon icon="key" variant="mini" class="shrink-0 opacity-60" />
                                     <flux:text class="text-sm truncate">{{ $permission->name }}</flux:text>
                                 </label>
                             @endforeach

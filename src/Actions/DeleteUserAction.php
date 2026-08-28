@@ -2,10 +2,11 @@
 
 namespace Kreetancraft\UserManagement\Actions;
 
+use Kreetancraft\UserManagement\Contracts\ManagesUsers;
 use Kreetancraft\UserManagement\Events\UserDeleted;
 use Kreetancraft\UserManagement\Exceptions\CannotDeleteLastSuperAdmin;
+use Kreetancraft\UserManagement\Exceptions\CannotDeleteOwnAccount;
 use Kreetancraft\UserManagement\Models\User;
-use Kreetancraft\UserManagement\Repositories\UserRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteUserAction
@@ -13,7 +14,7 @@ class DeleteUserAction
     use AsAction;
 
     public function __construct(
-        private UserRepository $users,
+        private ManagesUsers $users,
     ) {}
 
     /**
@@ -28,6 +29,10 @@ class DeleteUserAction
      */
     public function handle(User $user): void
     {
+        if (auth()->id() === $user->id) {
+            throw CannotDeleteOwnAccount::make();
+        }
+
         if ($user->isSuperAdmin() && User::superAdmins()->count() <= 1) {
             throw CannotDeleteLastSuperAdmin::make();
         }

@@ -8,7 +8,7 @@
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div>
-                <flux:heading size="xl" class="leading-7 tracking-tight text-zinc-900 dark:text-zinc-100">{{ __('Create Role') }}</flux:heading>
+                <flux:heading size="xl" level="1">{{ __('Create Role') }}</flux:heading>
                 <flux:subheading>{{ __('Define a new access level and the permissions it grants.') }}</flux:subheading>
             </div>
             <div class="flex items-center gap-2">

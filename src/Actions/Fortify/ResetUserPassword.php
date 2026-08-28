@@ -3,9 +3,9 @@
 namespace Kreetancraft\UserManagement\Actions\Fortify;
 
 use Illuminate\Support\Facades\Validator;
-use Laravel\Fortify\Contracts\ResetsUserPasswords;
 use Kreetancraft\UserManagement\Concerns\PasswordValidationRules;
 use Kreetancraft\UserManagement\Models\User;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
 class ResetUserPassword implements ResetsUserPasswords
 {

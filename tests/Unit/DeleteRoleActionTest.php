@@ -1,7 +1,7 @@
 <?php
 
 use Kreetancraft\UserManagement\Actions\DeleteRoleAction;
-use Kreetancraft\UserManagement\Enums\UserRole;
+use Kreetancraft\UserManagement\Models\User;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -19,7 +19,7 @@ test('a custom role can be deleted', function () {
 
 test('a deleted role detaches its permissions', function () {
     $role = Role::create(['name' => 'temp-with-perms']);
-    $role->givePermissionTo('view-trips');
+    $role->givePermissionTo('view-users');
 
     expect($role->permissions()->count())->toBe(1);
 
@@ -28,12 +28,12 @@ test('a deleted role detaches its permissions', function () {
     expect(Role::where('name', 'temp-with-perms')->exists())->toBeFalse();
 });
 
-test('system roles defined in UserRole enum cannot be deleted', function () {
-    $roleEnum = UserRole::SuperAdmin;
-    $role = Role::findByName($roleEnum->value);
+test('system roles cannot be deleted', function () {
+    $roleName = User::superAdminRole();
+    $role = Role::findByName($roleName);
 
     expect(fn () => DeleteRoleAction::run($role))
-        ->toThrow(RuntimeException::class, "System role '{$roleEnum->value}' cannot be deleted.");
+        ->toThrow(RuntimeException::class, "System role '{$roleName}' cannot be deleted.");
 
-    expect(Role::where('name', $roleEnum->value)->exists())->toBeTrue();
+    expect(Role::where('name', $roleName)->exists())->toBeTrue();
 });

@@ -1,20 +1,21 @@
-<x-layouts::auth :title="__('Confirm password')">
+<x-dynamic-component :component="config('user-management.layouts.auth', 'layouts.auth')" :title="__('Confirm password')">
     <div class="flex flex-col gap-6">
-        <x-auth-header
+        <x-user-management::auth-header
             :title="__('Confirm password')"
             :description="__('This is a secure area of the application. Please confirm your password before continuing.')"
         />
 
-        <x-auth-session-status class="text-center" :status="session('status')" />
+        <x-user-management::auth-session-status class="text-center" :status="session('status')" />
 
-        <x-passkey-verify
+        @if (\Illuminate\Support\Facades\View::exists('components.passkey-verify'))
+                <x-dynamic-component component="passkey-verify"
             options-route="passkey.confirm-options"
             submit-route="passkey.confirm"
             :label="__('Confirm with passkey')"
             :loading-label="__('Confirming...')"
             :separator="__('Or confirm with password')"
         />
-
+            @endif
         <form method="POST" action="{{ route('password.confirm.store') }}" class="flex flex-col gap-6">
             @csrf
 
@@ -44,4 +45,4 @@
             </flux:button>
         </form>
     </div>
-</x-layouts::auth>
+</x-dynamic-component>

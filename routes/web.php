@@ -19,7 +19,7 @@ Route::middleware('throttle:6,1')->group(function () {
 });
 
 // Admin impersonation (super-admins only, gated in the User model). Hard dependency.
-if (method_exists(\Illuminate\Support\Facades\Route::class, 'impersonate') || \Illuminate\Support\Facades\Route::hasMacro('impersonate')) {
+if (method_exists(Route::class, 'impersonate') || Route::hasMacro('impersonate')) {
     Route::middleware(['auth', 'verified', 'can:view-users'])->group(function () {
         Route::impersonate();
     });

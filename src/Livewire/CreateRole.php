@@ -3,9 +3,9 @@
 namespace Kreetancraft\UserManagement\Livewire;
 
 use Flux\Flux;
+use Kreetancraft\UserManagement\Actions\CreateRoleAction;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Kreetancraft\UserManagement\Actions\CreateRoleAction;
 use SanderMuller\FluentValidation\FluentRule as Rule;
 use Spatie\Permission\Models\Permission;
 
@@ -58,6 +58,6 @@ class CreateRole extends Component
     {
         return view('user-management::livewire.create-role', [
             'permissions' => Permission::orderBy('name')->get(),
-        ])->layout(config('user-management.layouts.admin', 'layouts.app'));
+        ])->layout(config('user-management.layouts.admin', 'components.layouts.app'));
     }
 }

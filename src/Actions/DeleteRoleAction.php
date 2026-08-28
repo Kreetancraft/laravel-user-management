@@ -4,8 +4,8 @@ namespace Kreetancraft\UserManagement\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Lorisleiva\Actions\Concerns\AsAction;
 use Kreetancraft\UserManagement\Models\User;
+use Lorisleiva\Actions\Concerns\AsAction;
 use RuntimeException;
 use Spatie\Permission\Models\Role;
 
