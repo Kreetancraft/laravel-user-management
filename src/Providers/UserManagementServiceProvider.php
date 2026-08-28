@@ -16,6 +16,7 @@ use Kreetancraft\UserManagement\Contracts\UserContract;
 use Kreetancraft\UserManagement\Http\Middleware\EnsureTwoFactorEnforced;
 use Kreetancraft\UserManagement\Http\Middleware\EnsureUserIsActive;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Navigation;
 use Kreetancraft\UserManagement\Observers\UserObserver;
 use Kreetancraft\UserManagement\Policies\UserPolicy;
 use Kreetancraft\UserManagement\Repositories\RoleRepository;
@@ -34,6 +35,13 @@ class UserManagementServiceProvider extends ServiceProvider
         $this->app->bind(ManagesUsers::class, UserRepository::class);
         $this->app->bind(QueriesUsers::class, UserRepository::class);
         $this->app->bind(RoleContract::class, RoleRepository::class);
+
+        // Bound under a string key so a package can contribute a sidebar link
+        // through Navigation::TAG without ever naming this class.
+        $this->app->singleton(Navigation::class, fn ($app) => new Navigation($app));
+        $this->app->alias(Navigation::class, Navigation::TAG);
+
+        $this->registerNavigation();
 
         $this->app->register(EventServiceProvider::class);
         $this->app->register(FortifyServiceProvider::class);
@@ -90,6 +98,33 @@ class UserManagementServiceProvider extends ServiceProvider
     protected function registerRoutes(): void
     {
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+    }
+
+    /**
+     * This package's own sidebar links, contributed through the same tag any
+     * other package uses. Dogfooding the seam keeps it honest: there is no
+     * privileged path for our own links that a third party cannot take.
+     */
+    private function registerNavigation(): void
+    {
+        $this->app->bind('user-management.navigation.items', fn () => [
+            [
+                'label' => __('Users'),
+                'icon' => 'users',
+                'route' => config('user-management.routes.names.users.index', 'admin.users'),
+                'ability' => 'view-users',
+                'sort' => 10,
+            ],
+            [
+                'label' => __('Roles'),
+                'icon' => 'shield-check',
+                'route' => config('user-management.routes.names.roles.index', 'admin.roles'),
+                'ability' => 'manage-roles',
+                'sort' => 20,
+            ],
+        ]);
+
+        $this->app->tag('user-management.navigation.items', Navigation::TAG);
     }
 
     private function registerMiddleware(): void

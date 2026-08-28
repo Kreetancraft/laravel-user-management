@@ -86,6 +86,67 @@ screens are plain Blade wrapped in `<x-dynamic-component>`, which takes a **comp
 ],
 ```
 
+### The sidebar
+
+Include the nav once, anywhere in your layout:
+
+```blade
+<flux:navlist.group heading="Admin">
+    <x-user-management::nav />
+</flux:navlist.group>
+```
+
+That renders every admin link — this package's, and any other package's. There
+is no list to maintain: `user-management:install` will inject the line for you,
+or add it by hand.
+
+#### Adding your own links
+
+```php
+app(\Kreetancraft\UserManagement\Navigation::class)->add([
+    'label' => 'Reports',
+    'icon' => 'chart-bar',
+    'route' => 'admin.reports',
+    'ability' => 'view-reports',   // optional
+    'sort' => 40,
+]);
+```
+
+#### Adding links from another package
+
+A package cannot depend on this one just to appear in a sidebar, so the seam is
+a container tag — bind an item, tag it `admin.navigation`, done:
+
+```php
+// in any service provider. No mention of this package anywhere.
+$this->app->bind('acme.navigation.items', fn () => [[
+    'label' => __('Invoices'),
+    'icon' => 'document-text',
+    'route' => 'admin.invoices',
+    'ability' => 'viewAny',
+    'model' => Invoice::class,
+    'sort' => 30,
+]]);
+
+$this->app->tag('acme.navigation.items', 'admin.navigation');
+```
+
+Why a tag rather than a facade call: tags are collected at render time, so
+provider order does not matter, and a binding nobody collects is never resolved.
+The contributing package keeps working unchanged when this one is not installed.
+
+`kreetancraft/laravel-media-manager` does exactly this — install it and a
+**Media** link appears, with nothing declared on either side.
+
+| Key | |
+|---|---|
+| `label` | Required. Already translated — pass `__('…')` yourself. |
+| `route` | Required, a route **name**. Skipped silently if the route does not exist, so a package whose routes are switched off cannot break the sidebar. |
+| `ability` | Optional. With `model`, the ordinary policy question; without, a bare ability check. Omit to always show. |
+| `model` | Optional. Pass it when a policy decides, so the link appears exactly when the page behind it is reachable. |
+| `icon` | Optional, a Flux/Heroicon name. Defaults to `square-2-stack`. |
+| `sort` | Optional, defaults to 50. This package uses 10 (Users) and 20 (Roles). |
+
 ## Configuration
 
 `config/user-management.php`:

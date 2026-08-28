@@ -1,6 +1,17 @@
-@can('view-users')
-    <flux:navlist.item icon="users" :href="route(config('user-management.routes.names.users.index', 'admin.users'))" :current="request()->routeIs(config('user-management.routes.names.users.index', 'admin.users').'*')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
-@endcan
-@can('manage-roles')
-    <flux:navlist.item icon="shield-check" :href="route(config('user-management.routes.names.roles.index', 'admin.roles'))" :current="request()->routeIs(config('user-management.routes.names.roles.index', 'admin.roles').'*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
-@endcan
+{{--
+    Every admin sidebar link, from this package and from any other package that
+    contributed one through Navigation::TAG. Include it once:
+
+        <x-user-management::nav />
+
+    Nothing here names a package. Adding a screen — here or elsewhere — does not
+    touch this file.
+--}}
+@foreach (app(\Kreetancraft\UserManagement\Navigation::class)->items() as $item)
+    <flux:navlist.item
+        :icon="$item['icon']"
+        :href="$item['href']"
+        :current="$item['active']"
+        wire:navigate
+    >{{ $item['label'] }}</flux:navlist.item>
+@endforeach
