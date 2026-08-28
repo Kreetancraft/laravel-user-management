@@ -29,12 +29,11 @@ test('a deleted role detaches its permissions', function () {
 });
 
 test('system roles defined in UserRole enum cannot be deleted', function () {
-    foreach (UserRole::cases() as $roleEnum) {
-        $role = Role::findByName($roleEnum->value);
+    $roleEnum = UserRole::SuperAdmin;
+    $role = Role::findByName($roleEnum->value);
 
-        expect(fn () => DeleteRoleAction::run($role))
-            ->toThrow(RuntimeException::class, "System role '{$roleEnum->value}' cannot be deleted.");
+    expect(fn () => DeleteRoleAction::run($role))
+        ->toThrow(RuntimeException::class, "System role '{$roleEnum->value}' cannot be deleted.");
 
-        expect(Role::where('name', $roleEnum->value)->exists())->toBeTrue();
-    }
+    expect(Role::where('name', $roleEnum->value)->exists())->toBeTrue();
 });

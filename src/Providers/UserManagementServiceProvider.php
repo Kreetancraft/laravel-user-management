@@ -64,6 +64,10 @@ class UserManagementServiceProvider extends ServiceProvider
             __DIR__.'/../../resources/views' => resource_path('views/vendor/user-management'),
         ], 'user-management-views');
 
+        $this->publishes([
+            __DIR__.'/../../resources/css/user-management.css' => resource_path('css/vendor/user-management.css'),
+        ], 'user-management-assets');
+
         Blade::componentNamespace('Kreetancraft\UserManagement\\View\\Components', 'user-management');
         Blade::anonymousComponentPath(__DIR__.'/../../resources/views/components', 'user-management');
     }
