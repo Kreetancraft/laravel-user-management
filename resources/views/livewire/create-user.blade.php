@@ -1,102 +1,89 @@
-<div class="space-y-8">
-    {{-- Page header --}}
-    <div class="space-y-3">
-        <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item>{{ __('Create User') }}</flux:breadcrumbs.item>
-        </flux:breadcrumbs>
+<div class="space-y-6">
+    <x-user-management::page-header
+        :title="__('Invite user')"
+        :subtitle="__('They receive an email and set their own password — you never handle it.')"
+    >
+        <x-slot:breadcrumbs>
+            <flux:breadcrumbs>
+                <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item>{{ __('Invite') }}</flux:breadcrumbs.item>
+            </flux:breadcrumbs>
+        </x-slot:breadcrumbs>
+    </x-user-management::page-header>
 
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-            <div>
-                <flux:heading size="xl" level="1">{{ __('Create User') }}</flux:heading>
-                <flux:subheading>{{ __('Add a new staff member and assign their role.') }}</flux:subheading>
-            </div>
-            <div class="flex items-center gap-2">
-                <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
-                    {{ __('Cancel') }}
-                </flux:button>
-            </div>
-        </div>
-    </div>
+    <flux:separator variant="subtle" />
 
-    <flux:separator />
-
-    {{-- Form --}}
-    <form wire:submit.prevent="save" class="space-y-12">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {{-- Left column: Account Details (2 cols on lg) --}}
-            <div class="lg:col-span-2 space-y-12">
-                <x-form-card :title="__('Account Details')" :subtitle="__('An invitation email will be sent so they can set their own password.')">
+    <form wire:submit.prevent="save" class="space-y-6">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {{-- The form is the protagonist: it gets two thirds and the focus. --}}
+            <div class="lg:col-span-2">
+                <x-user-management::form-section
+                    :title="__('Account')"
+                    :subtitle="__('Name and email are all that is needed to send the invitation.')"
+                >
                     <flux:field>
-                        <flux:label required>{{ __('Full Name') }}</flux:label>
-                        <flux:input
-                            wire:model.blur="name"
-                            placeholder="{{ __('Jane Doe') }}"
-                            icon="user"
-                            required
-                            autofocus
-                        />
+                        <flux:label badge="{{ __('Required') }}">{{ __('Full name') }}</flux:label>
+                        <flux:input wire:model.blur="name" placeholder="{{ __('Jane Doe') }}" autofocus />
                         <flux:error name="name" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label required>{{ __('Email Address') }}</flux:label>
-                        <flux:input
-                            wire:model.blur="email"
-                            type="email"
-                            placeholder="{{ __('jane@example.com') }}"
-                            icon="envelope"
-                            required
-                        />
+                        <flux:label badge="{{ __('Required') }}">{{ __('Email address') }}</flux:label>
+                        <flux:input wire:model.blur="email" type="email" placeholder="{{ __('jane@example.com') }}" />
+                        <flux:description>{{ __('The invitation link is sent here and expires.') }}</flux:description>
                         <flux:error name="email" />
                     </flux:field>
-                </x-form-card>
+                </x-user-management::form-section>
             </div>
 
-            {{-- Right column: Status & Roles --}}
-            <div class="lg:col-span-1 space-y-12">
-                {{-- Status card --}}
-                <x-form-card :title="__('Status')" :subtitle="__('Controls sign-in access.')">
+            <div class="space-y-6">
+                <x-user-management::form-section :title="__('Access')">
                     <flux:switch
                         wire:model="is_active"
-                        label="{{ __('Account active') }}"
-                        description="{{ __('Inactive users cannot sign in.') }}"
+                        :label="__('Account active')"
+                        :description="__('Inactive users cannot sign in.')"
                     />
-                </x-form-card>
+                </x-user-management::form-section>
 
-                {{-- Roles card --}}
-                <x-form-card :title="__('Roles')" :subtitle="__('User inherits all permissions of selected roles.')">
-                    @if (count($selectedRoles))
-                        <x-slot:actions>
-                            <flux:badge size="sm" color="zinc">{{ count($selectedRoles) }}</flux:badge>
-                        </x-slot:actions>
+                <x-user-management::form-section :title="__('Roles')">
+                    @if ($roles->isEmpty())
+                        <flux:callout variant="warning" icon="exclamation-triangle">
+                            {{ __('No roles exist yet. The user can be invited now and assigned a role later.') }}
+                        </flux:callout>
+                    @else
+                        <flux:checkbox.group wire:model="selectedRoles" class="space-y-2">
+                            @foreach ($roles as $role)
+                                <flux:checkbox
+                                    wire:key="role-{{ $role->id }}"
+                                    value="{{ $role->name }}"
+                                    :label="\Kreetancraft\UserManagement\Support\RolePresenter::label($role->name)"
+                                    :description="trans_choice('{0}No permissions|{1}:count permission|[2,*]:count permissions', $role->permissions_count ?? 0, ['count' => $role->permissions_count ?? 0])"
+                                />
+                            @endforeach
+                        </flux:checkbox.group>
+                        <flux:error name="selectedRoles" />
                     @endif
-                    <flux:checkbox.group wire:model="selectedRoles" class="space-y-2">
-                        @foreach ($roles as $role)
-                            <label wire:key="role-{{ $role->id }}" class="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-surface-muted cursor-pointer transition">
-                                <flux:checkbox value="{{ $role->name }}" class="mt-0.5" />
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <x-user-management::role-badge :role="$role" icon />
-                                    </div>
-                                    <flux:text size="sm" variant="subtle" class="mt-1 block">
-                                        {{ trans_choice('{0}No permissions|{1}:count permission|[2,*]:count permissions', $role->permissions_count ?? 0, ['count' => $role->permissions_count ?? 0]) }}
-                                    </flux:text>
-                                </div>
-                            </label>
-                        @endforeach
-                    </flux:checkbox.group>
-                </x-form-card>
+                </x-user-management::form-section>
             </div>
         </div>
 
-        {{-- Form footer actions --}}
-        <div class="flex items-center justify-end gap-2 pt-2">
-            <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate>
-                {{ __('Cancel') }}
-            </flux:button>
-            <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled" wire:target="save" data-test="create-user-submit">
-                {{ __('Send Invitation') }}
+        <div class="flex items-center justify-end gap-2">
+            <flux:button
+                href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}"
+                variant="ghost"
+                wire:navigate
+            >{{ __('Cancel') }}</flux:button>
+
+            <flux:button
+                type="submit"
+                variant="primary"
+                icon="paper-airplane"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                data-test="create-user-submit"
+            >
+                <span wire:loading.remove wire:target="save">{{ __('Send invitation') }}</span>
+                <span wire:loading wire:target="save">{{ __('Sending…') }}</span>
             </flux:button>
         </div>
     </form>

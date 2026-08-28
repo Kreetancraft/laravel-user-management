@@ -6,8 +6,8 @@
         <x-user-management::auth-session-status class="text-center" :status="session('status')" />
 
         @if (\Illuminate\Support\Facades\View::exists('components.passkey-verify'))
-                <x-dynamic-component component="passkey-verify" />
-            @endif
+            <x-dynamic-component component="passkey-verify" />
+        @endif
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
             @csrf
 
@@ -46,14 +46,11 @@
             <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
 
             <div>
-                <flux:button variant="primary" type="submit" class="w-full bg-[#4da8da] hover:bg-[#3d96c8] border-[#4da8da] text-white" data-test="login-button">
+                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
                     {{ __('Sign in') }}
                 </flux:button>
             </div>
         </form>
 
-        <flux:text class="text-center text-sm text-neutral-500 dark:text-neutral-400">
-            {{ config('app.name', 'Himalayan Trek Ventures') }} &copy; {{ date('Y') }}
-        </flux:text>
     </div>
 </x-dynamic-component>

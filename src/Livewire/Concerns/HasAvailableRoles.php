@@ -15,7 +15,9 @@ trait HasAvailableRoles
      */
     private function availableRoles(): Collection
     {
-        $query = Role::query()->orderBy('name');
+        // withCount, not a lazy $role->permissions->count() in the view: one
+        // query for the whole list instead of one per row.
+        $query = Role::query()->withCount('permissions')->orderBy('name');
 
         if (! auth()->user()->isSuperAdmin()) {
             $query->where('name', '!=', User::superAdminRole());

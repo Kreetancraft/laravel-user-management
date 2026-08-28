@@ -5,9 +5,9 @@
         </flux:text>
 
         @if (session('status') == 'verification-link-sent')
-            <flux:text class="text-center font-medium !dark:text-green-400 !text-green-600">
-                {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-            </flux:text>
+            <flux:callout variant="success">
+                {{ __('A new verification link has been sent to your email address.') }}
+            </flux:callout>
         @endif
 
         <div class="flex flex-col items-center justify-between space-y-3">

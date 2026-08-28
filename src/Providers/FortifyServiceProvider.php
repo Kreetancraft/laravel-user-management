@@ -22,37 +22,39 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->syncFortifyFeatures();
+        //
     }
 
     /**
-     * Keep Fortify's feature list in step with this package's own flags.
+     * Turn OFF any Fortify feature this package is configured not to support.
      *
-     * Without this, turning a feature off here would still leave Fortify
-     * registering its route while this package declines to register the view —
-     * producing an unresolvable RegisterViewResponse rather than an honest 404.
+     * Subtractive only, and deliberately so. An earlier version rebuilt the
+     * list, which silently dropped resetPasswords and emailVerification when it
+     * ran before Fortify's own config had been merged. The host's fortify
+     * config decides what is enabled; all this package may do is withdraw a
+     * feature whose view it declines to register, so Fortify cannot route to a
+     * view that does not exist.
      */
     private function syncFortifyFeatures(): void
     {
-        $map = [
-            Features::registration() => 'registration',
-            Features::twoFactorAuthentication() => 'two_factor',
-        ];
+        $disabled = [];
 
-        $features = (array) config('fortify.features', []);
-
-        foreach ($map as $fortifyFeature => $flag) {
-            $enabled = (bool) config("user-management.features.{$flag}", true);
-            $present = in_array($fortifyFeature, $features, true);
-
-            if (! $enabled && $present) {
-                $features = array_values(array_diff($features, [$fortifyFeature]));
-            } elseif ($enabled && ! $present) {
-                $features[] = $fortifyFeature;
-            }
+        if (! config('user-management.features.registration', false)) {
+            $disabled[] = Features::registration();
         }
 
-        config(['fortify.features' => $features]);
+        if (! config('user-management.features.two_factor', true)) {
+            $disabled[] = Features::twoFactorAuthentication();
+        }
+
+        if ($disabled === []) {
+            return;
+        }
+
+        config(['fortify.features' => array_values(array_diff(
+            (array) config('fortify.features', []),
+            $disabled,
+        ))]);
     }
 
     /**
@@ -60,6 +62,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->syncFortifyFeatures();
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();

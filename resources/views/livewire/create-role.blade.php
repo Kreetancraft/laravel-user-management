@@ -1,88 +1,86 @@
-<div class="space-y-8">
-    {{-- Page header --}}
-    <div class="space-y-3">
-        <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.roles.index', 'admin.roles')) }}" wire:navigate>{{ __('Roles') }}</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item>{{ __('Create Role') }}</flux:breadcrumbs.item>
-        </flux:breadcrumbs>
+<div class="space-y-6">
+    <x-user-management::page-header
+        :title="__('New role')"
+        :subtitle="__('A role is a named bundle of permissions. Grant only what it needs.')"
+    >
+        <x-slot:breadcrumbs>
+            <flux:breadcrumbs>
+                <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.roles.index', 'admin.roles')) }}" wire:navigate>{{ __('Roles') }}</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item>{{ __('New') }}</flux:breadcrumbs.item>
+            </flux:breadcrumbs>
+        </x-slot:breadcrumbs>
+    </x-user-management::page-header>
 
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+    <flux:separator variant="subtle" />
+
+    <form wire:submit.prevent="save" class="space-y-6">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div>
-                <flux:heading size="xl" level="1">{{ __('Create Role') }}</flux:heading>
-                <flux:subheading>{{ __('Define a new access level and the permissions it grants.') }}</flux:subheading>
-            </div>
-            <div class="flex items-center gap-2">
-                <flux:button href="{{ route(config('user-management.routes.names.roles.index', 'admin.roles')) }}" variant="ghost" wire:navigate>
-                    {{ __('Cancel') }}
-                </flux:button>
-            </div>
-        </div>
-    </div>
-
-    <flux:separator />
-
-    {{-- Form --}}
-    <form wire:submit.prevent="save" class="space-y-12">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {{-- Left column: Role Identity --}}
-            <div class="lg:col-span-1 space-y-12">
-                <x-form-card :title="__('Role Identity')" :subtitle="__('A short, lowercase identifier in kebab-case.')">
+                <x-user-management::form-section :title="__('Name')">
                     <flux:field>
-                        <flux:label required>{{ __('Role Name') }}</flux:label>
-                        <flux:input
-                            wire:model.blur="name"
-                            placeholder="{{ __('e.g. content-editor') }}"
-                            icon="shield-check"
-                            required
-                            autofocus
-                        />
+                        <flux:label badge="{{ __('Required') }}">{{ __('Role name') }}</flux:label>
+                        <flux:input wire:model.blur="name" placeholder="{{ __('content-editor') }}" autofocus />
+                        <flux:description>{{ __('Lowercase and hyphenated. Shown to admins as “Content Editor”.') }}</flux:description>
                         <flux:error name="name" />
                     </flux:field>
-                </x-form-card>
-
-                {{-- Helpful tip card --}}
-                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl p-5">
-                    <div class="flex gap-3">
-                        <flux:icon icon="information-circle" class="text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
-                        <div class="space-y-1">
-                            <flux:text class="text-sm font-medium text-blue-900 dark:text-blue-200">
-                                {{ __('Choosing permissions') }}
-                            </flux:text>
-                            <flux:text class="text-xs text-blue-800 dark:text-blue-300">
-                                {{ __('Grant only the permissions this role truly needs. You can always update them later.') }}
-                            </flux:text>
-                        </div>
-                    </div>
-                </div>
+                </x-user-management::form-section>
             </div>
 
-            {{-- Right column: Permissions (2 cols on lg) --}}
-            <div class="lg:col-span-2 space-y-12">
-                <x-form-card :title="__('Permissions')" :subtitle="__('Users with this role gain access to every permission checked below.')">
-                    <x-slot:actions>
-                        <flux:badge size="sm" color="zinc">{{ count($selectedPermissions) }} / {{ $permissions->count() }}</flux:badge>
-                    </x-slot:actions>
-                    <flux:checkbox.group wire:model="selectedPermissions" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        @foreach ($permissions as $permission)
-                            <label wire:key="perm-{{ $permission->id }}" class="flex items-center gap-3 p-3 rounded-md border border-border hover:bg-surface-muted cursor-pointer transition">
-                                <flux:checkbox value="{{ $permission->name }}" />
-                                <flux:icon icon="key" variant="mini" class="text-content-subtle shrink-0" />
-                                <flux:text class="text-sm truncate">{{ $permission->name }}</flux:text>
-                            </label>
-                        @endforeach
-                    </flux:checkbox.group>
-                </x-form-card>
+            {{-- Permissions carry the weight here: two thirds, grouped by resource
+                 so a long flat list becomes something you can actually scan. --}}
+            <div class="lg:col-span-2">
+                <x-user-management::form-section :title="__('Permissions')">
+                    <x-slot:subtitle>
+                        {{ trans_choice('{0}Nothing selected|{1}:count of :total selected|[2,*]:count of :total selected', count($selectedPermissions), ['count' => count($selectedPermissions), 'total' => $permissions->count()]) }}
+                    </x-slot:subtitle>
+
+                    @if ($permissions->isEmpty())
+                        <x-user-management::empty-state
+                            icon="key"
+                            :heading="__('No permissions yet')"
+                            :description="__('Run user-management:sync-permissions to generate them from your policies.')"
+                        />
+                    @else
+                        <flux:checkbox.group wire:model="selectedPermissions" class="space-y-5">
+                            @foreach ($permissions->groupBy(fn ($p) => \Illuminate\Support\Str::afterLast($p->name, '-')) as $group => $items)
+                                <div wire:key="group-{{ $group }}" class="space-y-2">
+                                    <flux:text size="sm" variant="subtle" class="font-medium uppercase tracking-wide">
+                                        {{ \Illuminate\Support\Str::headline($group) }}
+                                    </flux:text>
+
+                                    <div class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+                                        @foreach ($items as $permission)
+                                            <flux:checkbox
+                                                wire:key="perm-{{ $permission->id }}"
+                                                value="{{ $permission->name }}"
+                                                :label="$permission->name"
+                                            />
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </flux:checkbox.group>
+                        <flux:error name="selectedPermissions" />
+                    @endif
+                </x-user-management::form-section>
             </div>
         </div>
 
-        {{-- Form footer actions --}}
-        <div class="flex items-center justify-end gap-2 pt-2">
-            <flux:button href="{{ route(config('user-management.routes.names.roles.index', 'admin.roles')) }}" variant="ghost" wire:navigate>
-                {{ __('Cancel') }}
-            </flux:button>
-            <flux:button type="submit" variant="primary" icon="check" wire:loading.attr="disabled" wire:target="save" data-test="create-role-submit">
-                {{ __('Create Role') }}
-            </flux:button>
+        <div class="flex items-center justify-end gap-2">
+            <flux:button
+                href="{{ route(config('user-management.routes.names.roles.index', 'admin.roles')) }}"
+                variant="ghost"
+                wire:navigate
+            >{{ __('Cancel') }}</flux:button>
+
+            <flux:button
+                type="submit"
+                variant="primary"
+                icon="check"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                data-test="create-role-submit"
+            >{{ __('Create role') }}</flux:button>
         </div>
     </form>
 </div>

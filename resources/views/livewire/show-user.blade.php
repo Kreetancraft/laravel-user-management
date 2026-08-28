@@ -1,166 +1,146 @@
-<div class="space-y-8">
-    {{-- Page Header --}}
-    <div class="space-y-3">
-        <flux:breadcrumbs>
-            <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item>{{ __('User Details') }}</flux:breadcrumbs.item>
-        </flux:breadcrumbs>
+<div class="space-y-6">
+    <x-user-management::page-header :title="$user->name" :subtitle="$user->email">
+        <x-slot:breadcrumbs>
+            <flux:breadcrumbs>
+                <flux:breadcrumbs.item href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" wire:navigate>{{ __('Users') }}</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item>{{ $user->name }}</flux:breadcrumbs.item>
+            </flux:breadcrumbs>
+        </x-slot:breadcrumbs>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <flux:heading size="xl" level="1">{{ $user->name }}</flux:heading>
-                <flux:subheading>
-                    {{ $user->email }}
-                    @if ($user->last_login_at)
-                        · {{ __('Last seen') }} {{ $user->last_login_at->diffForHumans() }}
-                    @else
-                        · {{ __('Never signed in') }}
-                    @endif
-                </flux:subheading>
-            </div>
-            <div class="flex items-center gap-2">
-                <flux:button href="{{ route(config('user-management.routes.names.users.index', 'admin.users')) }}" variant="ghost" wire:navigate icon="chevron-left">
-                    {{ __('Back') }}
-                </flux:button>
-                @can('update', $user)
-                    <flux:button href="{{ route(config('user-management.routes.names.users.edit', 'admin.users.edit'), $user) }}" variant="primary" icon="pencil" wire:navigate>
-                        {{ __('Edit User') }}
-                    </flux:button>
-                @endcan
-            </div>
-        </div>
-    </div>
+        <x-slot:meta>
+            <x-user-management::status-badge :active="$user->is_active" />
+            @forelse ($user->roles as $role)
+                <x-user-management::role-badge :role="$role" wire:key="role-{{ $role->id }}" />
+            @empty
+                <flux:text size="sm" variant="subtle">{{ __('No roles assigned') }}</flux:text>
+            @endforelse
+        </x-slot:meta>
 
-    <flux:separator />
+        <x-slot:actions>
+            @can('update', $user)
+                <flux:button
+                    href="{{ route(config('user-management.routes.names.users.edit', 'admin.users.edit'), $user) }}"
+                    variant="primary"
+                    icon="pencil-square"
+                    wire:navigate
+                >{{ __('Edit') }}</flux:button>
+            @endcan
+        </x-slot:actions>
+    </x-user-management::page-header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {{-- Left Column: User Profile Summary --}}
-        <div class="lg:col-span-1 space-y-12">
-            <flux:card class="overflow-hidden p-0">
-                <div class="p-6 border-b border-zinc-100 dark:border-zinc-800 flex flex-col items-center text-center space-y-4">
+    <flux:separator variant="subtle" />
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div>
+            <flux:card class="space-y-6">
+                <div class="flex items-center gap-4">
                     <flux:avatar
                         circle
-                        size="xl"
+                        size="lg"
                         :name="$user->name"
                         :initials="$user->initials()"
                         :src="$user->avatarUrl()"
-                        class="h-24 w-24 text-2xl shadow-sm border-2 border-white dark:border-zinc-800"
                     />
-
-                    <div>
-                        <flux:heading size="lg">{{ $user->name }}</flux:heading>
-                        <flux:text size="sm" variant="subtle">{{ $user->email }}</flux:text>
-                    </div>
-
-                    <div class="flex flex-wrap justify-center gap-1.5">
-                        @forelse ($user->roles as $role)
-                            <x-user-management::role-badge :role="$role" wire:key="role-{{ $role->id }}" />
-                        @empty
-                            <flux:text size="sm" variant="subtle">{{ __('No roles assigned') }}</flux:text>
-                        @endforelse
-
-                        @if ($user->is_active)
-                            <flux:badge size="sm" color="green">{{ __('Active') }}</flux:badge>
-                        @else
-                            <flux:badge size="sm" color="zinc">{{ __('Inactive') }}</flux:badge>
-                        @endif
+                    <div class="min-w-0">
+                        <flux:heading size="lg" class="truncate">{{ $user->name }}</flux:heading>
+                        <flux:text size="sm" variant="subtle" class="truncate">{{ $user->email }}</flux:text>
                     </div>
                 </div>
 
-                <div class="p-6 space-y-4 text-sm">
-                    <div class="flex justify-between items-center">
-                        <flux:text variant="subtle" class="font-medium">{{ __('Account Created') }}</flux:text>
-                        <flux:text class="font-semibold">{{ $user->created_at->format('M d, Y') }}</flux:text>
+                <flux:separator variant="subtle" />
+
+                {{-- Label left, value right, one line each: a spec sheet, not a form. --}}
+                <dl class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between gap-4">
+                        <dt><flux:text size="sm" variant="subtle">{{ __('Joined') }}</flux:text></dt>
+                        <dd class="font-medium tabular-nums">{{ $user->created_at->format('M j, Y') }}</dd>
                     </div>
 
-                    <div class="flex justify-between items-center">
-                        <flux:text variant="subtle" class="font-medium">{{ __('Last Login IP') }}</flux:text>
-                        <flux:text class="font-mono font-semibold">{{ $user->last_login_ip ?? __('N/A') }}</flux:text>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt><flux:text size="sm" variant="subtle">{{ __('Last seen') }}</flux:text></dt>
+                        <dd class="font-medium">
+                            @if ($user->last_login_at)
+                                <flux:tooltip :content="$user->last_login_at->toDayDateTimeString()">
+                                    <span>{{ $user->last_login_at->diffForHumans() }}</span>
+                                </flux:tooltip>
+                            @else
+                                <flux:text size="sm" variant="subtle">{{ __('Never') }}</flux:text>
+                            @endif
+                        </dd>
                     </div>
 
-                    <div class="flex justify-between items-center">
-                        <flux:text variant="subtle" class="font-medium">{{ __('2FA Enabled') }}</flux:text>
-                        @if ($user->hasEnabledTwoFactorAuthentication())
-                            <flux:badge size="sm" color="green">{{ __('Yes') }}</flux:badge>
-                        @else
-                            <flux:badge size="sm" color="zinc">{{ __('No') }}</flux:badge>
-                        @endif
+                    <div class="flex items-center justify-between gap-4">
+                        <dt><flux:text size="sm" variant="subtle">{{ __('Last IP') }}</flux:text></dt>
+                        <dd class="font-mono text-xs tabular-nums">{{ $user->last_login_ip ?? '—' }}</dd>
                     </div>
-                </div>
+
+                    <div class="flex items-center justify-between gap-4">
+                        <dt><flux:text size="sm" variant="subtle">{{ __('Two-factor') }}</flux:text></dt>
+                        <dd>
+                            @if ($user->hasEnabledTwoFactorAuthentication())
+                                <flux:badge size="sm" color="emerald" icon="lock-closed">{{ __('On') }}</flux:badge>
+                            @elseif ($user->enforce_2fa)
+                                <flux:badge size="sm" color="amber" icon="exclamation-triangle">{{ __('Required') }}</flux:badge>
+                            @else
+                                <flux:badge size="sm" color="zinc">{{ __('Off') }}</flux:badge>
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
             </flux:card>
         </div>
 
-        {{-- Right Column: Login History --}}
-        <div class="lg:col-span-2 space-y-12">
-            <flux:card class="p-0">
-                <div class="p-6 border-b border-zinc-100 dark:border-zinc-800">
-                    <flux:heading size="lg">{{ __('Login History') }}</flux:heading>
-                    <flux:text size="sm" variant="subtle" class="mt-1">
-                        {{ __('A registry of recent successful login events for this account.') }}
-                    </flux:text>
-                </div>
+        <div class="lg:col-span-2 space-y-4">
+            <div>
+                <flux:heading size="lg">{{ __('Sign-in history') }}</flux:heading>
+                <flux:text size="sm" variant="subtle">{{ __('Where and when this account has been used.') }}</flux:text>
+            </div>
 
-                <div class="p-0">
-                    @if ($history->isEmpty())
-                        <div class="p-12 text-center">
-                            <flux:text variant="subtle">{{ __('No login logs found for this user.') }}</flux:text>
-                        </div>
-                    @else
-                        <flux:table>
-                            <flux:table.columns>
-                                <flux:table.column>{{ __('Date & Time') }}</flux:table.column>
-                                <flux:table.column>{{ __('IP Address') }}</flux:table.column>
-                                <flux:table.column>{{ __('Location') }}</flux:table.column>
-                                <flux:table.column>{{ __('Device & Browser') }}</flux:table.column>
-                            </flux:table.columns>
+            @if ($history->isEmpty())
+                <flux:card>
+                    <x-user-management::empty-state
+                        icon="clock"
+                        :heading="__('No sign-ins recorded')"
+                        :description="__('History appears here once the user signs in.')"
+                    />
+                </flux:card>
+            @else
+                <flux:table :paginate="$history">
+                    <flux:table.columns>
+                        <flux:table.column>{{ __('When') }}</flux:table.column>
+                        <flux:table.column>{{ __('Where') }}</flux:table.column>
+                        <flux:table.column>{{ __('Device') }}</flux:table.column>
+                    </flux:table.columns>
 
-                            <flux:table.rows>
-                                @foreach ($history as $log)
-                                    <flux:table.row :key="$log->id">
-                                        <flux:table.cell class="whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span class="font-medium">
-                                                    {{ $log->created_at->format('M d, Y H:i:s') }}
-                                                </span>
-                                                <span class="text-xs opacity-70">
-                                                    {{ $log->created_at->diffForHumans() }}
-                                                </span>
-                                            </div>
-                                        </flux:table.cell>
-                                        <flux:table.cell class="font-mono font-medium">
+                    <flux:table.rows>
+                        @foreach ($history as $log)
+                            <flux:table.row :key="$log->id">
+                                <flux:table.cell class="whitespace-nowrap">
+                                    <flux:tooltip :content="$log->created_at->toDayDateTimeString()">
+                                        <span class="font-medium">{{ $log->created_at->diffForHumans() }}</span>
+                                    </flux:tooltip>
+                                </flux:table.cell>
+
+                                <flux:table.cell>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium">{{ $log->formatted_location }}</span>
+                                        <flux:text size="sm" variant="subtle" class="font-mono tabular-nums">
                                             {{ $log->ip_address }}
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-lg" title="{{ $log->country_code ?? 'Unknown' }}">
-                                                    {{ $log->country_flag }}
-                                                </span>
-                                                <span class="font-medium">
-                                                    {{ $log->formatted_location }}
-                                                </span>
-                                            </div>
-                                        </flux:table.cell>
-                                        <flux:table.cell>
-                                            <div class="flex flex-col text-sm">
-                                                <span class="font-medium">
-                                                    {{ $log->browser }}
-                                                </span>
-                                                <span class="text-xs opacity-70">
-                                                    {{ $log->platform }}
-                                                </span>
-                                            </div>
-                                        </flux:table.cell>
-                                    </flux:table.row>
-                                @endforeach
-                            </flux:table.rows>
-                        </flux:table>
+                                        </flux:text>
+                                    </div>
+                                </flux:table.cell>
 
-                        <div class="p-4 border-t border-zinc-100 dark:border-zinc-800">
-                            {{ $history->links() }}
-                        </div>
-                    @endif
-                </div>
-            </flux:card>
+                                <flux:table.cell>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium">{{ $log->browser }}</span>
+                                        <flux:text size="sm" variant="subtle">{{ $log->platform }}</flux:text>
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                    </flux:table.rows>
+                </flux:table>
+            @endif
         </div>
     </div>
 </div>
