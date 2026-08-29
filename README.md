@@ -112,6 +112,22 @@ That renders every admin link — this package's, and any other package's. There
 is no list to maintain: `user-management:install` will inject the line for you,
 or add it by hand.
 
+Links carrying a `group` render under a heading. This package puts its own two
+under **Users**; rename or remove that heading with `user-management.navigation.group`.
+
+> **Do not publish the nav.** It has its own tag (`user-management-nav`) and is
+> excluded from `user-management-views` on purpose. A published copy wins over
+> the package's, so one taken before a feature existed keeps rendering the old
+> way after an upgrade — which is how sidebar grouping silently went missing for
+> anyone who published views at 0.7.0. Publish the screens freely; publish the
+> nav only if you mean to own it forever.
+>
+> If your sidebar is not grouping, that copy is why:
+>
+> ```bash
+> php artisan vendor:publish --tag=user-management-nav --force
+> ```
+
 #### Adding your own links
 
 ```php

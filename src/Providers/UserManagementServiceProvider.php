@@ -78,9 +78,19 @@ class UserManagementServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'user-management');
 
+        // The screens people restyle. `except` keeps the nav partial out: a copy
+        // of it frozen before a feature existed drops that feature silently,
+        // which is exactly how sidebar grouping went missing after 0.10.0.
         $this->publishes([
-            __DIR__.'/../../resources/views' => resource_path('views/vendor/user-management'),
+            __DIR__.'/../../resources/views/livewire' => resource_path('views/vendor/user-management/livewire'),
+            __DIR__.'/../../resources/views/auth' => resource_path('views/vendor/user-management/auth'),
+            __DIR__.'/../../resources/views/emails' => resource_path('views/vendor/user-management/emails'),
         ], 'user-management-views');
+
+        // Publishing this means you own it, and upgrades stop reaching it.
+        $this->publishes([
+            __DIR__.'/../../resources/views/components' => resource_path('views/vendor/user-management/components'),
+        ], 'user-management-nav');
 
         Blade::componentNamespace('Kreetancraft\UserManagement\\View\\Components', 'user-management');
         Blade::anonymousComponentPath(__DIR__.'/../../resources/views/components', 'user-management');
@@ -113,6 +123,7 @@ class UserManagementServiceProvider extends ServiceProvider
                 'icon' => 'users',
                 'route' => config('user-management.routes.names.users.index', 'admin.users'),
                 'ability' => 'view-users',
+                'group' => config('user-management.navigation.group', __('Users')),
                 'sort' => 10,
             ],
             [
@@ -120,6 +131,7 @@ class UserManagementServiceProvider extends ServiceProvider
                 'icon' => 'shield-check',
                 'route' => config('user-management.routes.names.roles.index', 'admin.roles'),
                 'ability' => 'manage-roles',
+                'group' => config('user-management.navigation.group', __('Users')),
                 'sort' => 20,
             ],
         ]);

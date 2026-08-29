@@ -6,6 +6,7 @@ use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Navigation;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\Widget;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\WidgetPolicy;
+use Kreetancraft\UserManagement\View\Components\Nav;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -221,4 +222,40 @@ test('a group takes the position of its earliest item', function () {
     app()->tag('b.nav', Navigation::TAG);
 
     expect(array_keys(nav()->grouped()))->toBe(['Alpha', 'Zulu']);
+});
+
+test('this package puts its own links under a heading', function () {
+    collect(packagePermissions())->each(fn ($p) => Permission::findOrCreate($p, 'web'));
+
+    $user = User::factory()->create();
+    $user->givePermissionTo(['view-users', 'manage-roles']);
+    $this->actingAs($user);
+
+    $sections = nav()->grouped();
+
+    expect($sections)->toHaveKey('Users')
+        ->and(collect($sections['Users'])->pluck('label'))
+        ->toContain('Users')
+        ->toContain('Roles');
+});
+
+test('the heading is configurable, for a host that calls it something else', function () {
+    collect(packagePermissions())->each(fn ($p) => Permission::findOrCreate($p, 'web'));
+    config()->set('user-management.navigation.group', 'Access');
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('view-users');
+    $this->actingAs($user);
+
+    expect(nav()->grouped())->toHaveKey('Access')->not->toHaveKey('Users');
+});
+
+test('the nav component hands the view both shapes', function () {
+    // A published copy of the view written against $items keeps working, flat,
+    // rather than erroring on an undefined variable. Old copies degrade.
+    $data = app(Nav::class)->render()->getData();
+
+    expect($data)->toHaveKeys(['sections', 'items'])
+        ->and($data['sections'])->toBeArray()
+        ->and($data['items'])->toBeArray();
 });

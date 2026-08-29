@@ -73,6 +73,19 @@ return [
     | Routes
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Sidebar
+    |--------------------------------------------------------------------------
+    |
+    | The heading this package's own links sit under. Set it to null to leave
+    | them loose at the top level.
+    |
+    */
+    'navigation' => [
+        'group' => 'Users',
+    ],
+
     'routes' => [
         'prefix' => 'admin',
         'middleware' => ['web', 'auth', 'verified', 'ensure.2fa.enforced'],
