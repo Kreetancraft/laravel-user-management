@@ -6,6 +6,7 @@ use Kreetancraft\UserManagement\Tests\Fixtures\Models\Gadget;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\ThirdPartyThing;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\Widget;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\DoohickeyPolicy;
+use Kreetancraft\UserManagement\Tests\Fixtures\Policies\ExtraMethodPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\GadgetPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\ThirdPartyPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\WidgetPolicy;
@@ -143,4 +144,17 @@ test('a policy may declare its own plural when deriving one reads wrong', functi
     expect(Permission::pluck('name')->all())
         ->toContain('view-kit')
         ->not->toContain('view-kits');
+});
+
+test('a policy may name abilities beyond CRUD', function () {
+    // A blog post has publish() as well as update(). Discovering only the
+    // configured CRUD set would leave publish-widgets checked by the policy and
+    // creatable by nobody.
+    Gate::policy(Widget::class, ExtraMethodPolicy::class);
+
+    $this->artisan('user-management:sync-permissions')->assertSuccessful();
+
+    expect(Permission::pluck('name')->all())
+        ->toContain('view-widgets')
+        ->toContain('publish-widgets');
 });

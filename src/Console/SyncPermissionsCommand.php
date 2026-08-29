@@ -153,6 +153,14 @@ class SyncPermissionsCommand extends Command
             'viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete',
         ]);
 
+        // A policy may name abilities beyond CRUD. Without this a method like
+        // publish() is checked by the policy but never generated, which is the
+        // orphan-permission drift this command exists to prevent — the check
+        // fails for everyone because nobody could grant what was never created.
+        if (defined($policy.'::PERMISSION_EXTRA_METHODS')) {
+            $methods = array_merge($methods, (array) constant($policy.'::PERMISSION_EXTRA_METHODS'));
+        }
+
         $names = [];
 
         foreach ($methods as $method) {
