@@ -63,3 +63,25 @@ it('passes when both halves are configured', function (): void {
         ->expectsOutputToContain('should be rendering')
         ->assertSuccessful();
 });
+
+it('says when the profile page still opens the library', function (): void {
+    config()->set('user-management.avatar_resolver', StubAvatarResolver::class);
+    config()->set('user-management.media_picker_view', 'fixtures-picker');
+    config()->set('user-management.avatar_uploader', null);
+
+    $this->artisan('user-management:avatar-doctor')
+        ->expectsOutputToContain('opens the media library')
+        ->assertSuccessful();
+});
+
+it('names an uploader component that is not registered', function (): void {
+    config()->set('user-management.avatar_resolver', StubAvatarResolver::class);
+    config()->set('user-management.media_picker_view', 'fixtures-picker');
+    config()->set('user-management.avatar_uploader', 'media.avatar-uploader');
+
+    // The media package is not installed in this suite, so the component is not
+    // registered — which is exactly the skew this reports.
+    $this->artisan('user-management:avatar-doctor')
+        ->expectsOutputToContain('no such Livewire component')
+        ->assertFailed();
+});
