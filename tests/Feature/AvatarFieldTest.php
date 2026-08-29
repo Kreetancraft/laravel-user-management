@@ -9,6 +9,7 @@ use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Support\Avatar;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 /**
  * Avatars could be displayed and never set.
@@ -197,4 +198,38 @@ it('needs permission to change someone else\'s avatar', function (): void {
 
     Livewire::test(AvatarPicker::class, ['user' => $someoneElse])
         ->assertForbidden();
+});
+
+it('lets a super admin set another user\'s avatar from the edit form', function (): void {
+    withAvatarSeam();
+
+    Role::findOrCreate(User::superAdminRole(), 'web');
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole(User::superAdminRole());
+    $this->actingAs($superAdmin);
+
+    $someone = User::factory()->create();
+
+    Livewire::test(EditUser::class, ['user' => $someone])
+        ->call('onMediaPicked', [11], 'user-avatar', [['id' => 11, 'url' => '/stub/11.jpg', 'name' => 'a.jpg']])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($someone->fresh()->avatarUrl())->toBe('/stub/11.jpg');
+});
+
+it('lets a super admin set another user\'s avatar from the standalone picker', function (): void {
+    withAvatarSeam();
+
+    Role::findOrCreate(User::superAdminRole(), 'web');
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole(User::superAdminRole());
+    $this->actingAs($superAdmin);
+
+    $someone = User::factory()->create();
+
+    Livewire::test(AvatarPicker::class, ['user' => $someone])
+        ->call('onMediaPicked', [12], 'user-avatar-'.$someone->id, [['id' => 12, 'url' => '/stub/12.jpg', 'name' => 'a.jpg']]);
+
+    expect($someone->fresh()->avatarUrl())->toBe('/stub/12.jpg');
 });

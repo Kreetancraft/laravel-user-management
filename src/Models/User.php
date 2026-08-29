@@ -105,6 +105,27 @@ class User extends Authenticatable implements PasskeyUser
      * package can override this on a subclass (or via `resolveRelationUsing`
      * plus an accessor) without editing this package's views.
      */
+    /**
+     * The type name this user is stored under in polymorphic tables.
+     *
+     * Always the configured user model, never whichever class happened to run
+     * the query. An application that extends this model — the documented way
+     * to add relations — saves an avatar as App\\Models\\User from its
+     * profile page, while this package's own screens query this class and look
+     * the attachment up under a different name. The row exists, nothing finds
+     * it, and the avatar appears on one screen and not another.
+     *
+     * spatie/laravel-permission writes model_has_roles.model_type through this
+     * same method, so this also stops role assignments splitting across two
+     * names for one person.
+     */
+    public function getMorphClass(): string
+    {
+        $configured = config('auth.providers.users.model');
+
+        return is_string($configured) && $configured !== '' ? $configured : static::class;
+    }
+
     public function avatarUrl(): ?string
     {
         $resolver = config('user-management.avatar_resolver');
