@@ -2,6 +2,7 @@
 
 namespace Kreetancraft\UserManagement\Events;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Events\Dispatchable;
 use Kreetancraft\UserManagement\Models\User;
 
@@ -23,6 +24,6 @@ class UserUpdated
     public function __construct(
         public User $user,
         public array $changes = [],
-        public ?User $updatedBy = null,
+        public ?Authenticatable $updatedBy = null,
     ) {}
 }

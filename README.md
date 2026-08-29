@@ -73,6 +73,12 @@ Or extend it, which is how you add avatars or your own relations:
 class User extends \Kreetancraft\UserManagement\Models\User {}
 ```
 
+Extending is the recommendation, not a requirement. Keeping the `App\Models\User` a
+fresh Laravel install gives you — extending `Illuminate\Foundation\Auth\User`, with
+Spatie's `HasRoles` — works: the package asks the person performing an action only what
+any authenticatable can answer. What you give up is the model's own conveniences
+(`avatarUrl()`, `isSuperAdmin()`, the login-history relation) on your own class.
+
 ### Let Tailwind see this package
 
 Required. Tailwind v4 generates only the classes it finds by scanning files, and

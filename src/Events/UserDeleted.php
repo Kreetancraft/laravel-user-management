@@ -2,6 +2,7 @@
 
 namespace Kreetancraft\UserManagement\Events;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Events\Dispatchable;
 use Kreetancraft\UserManagement\Models\User;
 
@@ -19,6 +20,6 @@ class UserDeleted
     public function __construct(
         public User $user,
         public string $name,
-        public ?User $deletedBy = null,
+        public ?Authenticatable $deletedBy = null,
     ) {}
 }

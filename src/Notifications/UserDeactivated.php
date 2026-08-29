@@ -3,10 +3,12 @@
 namespace Kreetancraft\UserManagement\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Support\Actor;
 
 class UserDeactivated extends Notification implements ShouldQueue
 {
@@ -14,7 +16,7 @@ class UserDeactivated extends Notification implements ShouldQueue
 
     public function __construct(
         public User $user,
-        public ?User $deactivatedBy = null,
+        public ?Authenticatable $deactivatedBy = null,
     ) {}
 
     /**
@@ -27,7 +29,7 @@ class UserDeactivated extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $by = $this->deactivatedBy?->name ?? __('an administrator');
+        $by = Actor::name($this->deactivatedBy) ?? __('an administrator');
 
         return (new MailMessage)
             ->subject(__('Your :app account has been deactivated', ['app' => config('app.name')]))

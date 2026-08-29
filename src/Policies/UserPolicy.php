@@ -2,7 +2,9 @@
 
 namespace Kreetancraft\UserManagement\Policies;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Support\Actor;
 
 class UserPolicy
 {
@@ -20,41 +22,41 @@ class UserPolicy
      * admins short-circuit policies, a check in this class would never run for
      * the only people who could trigger it. It lives in DeleteUserAction.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(Authenticatable $user): bool
     {
         return $user->can('view-users');
     }
 
-    public function view(User $user, User $target): bool
+    public function view(Authenticatable $user, Authenticatable $target): bool
     {
         return $user->can('view-users');
     }
 
-    public function create(User $user): bool
+    public function create(Authenticatable $user): bool
     {
         return $user->can('create-users');
     }
 
-    public function update(User $user, User $target): bool
+    public function update(Authenticatable $user, Authenticatable $target): bool
     {
         if (! $user->can('update-users')) {
             return false;
         }
 
-        return ! ($target->isSuperAdmin() && ! $user->isSuperAdmin());
+        return ! (Actor::isSuperAdmin($target) && ! Actor::isSuperAdmin($user));
     }
 
-    public function delete(User $user, User $target): bool
+    public function delete(Authenticatable $user, Authenticatable $target): bool
     {
         if (! $user->can('delete-users')) {
             return false;
         }
 
-        if ($user->id === $target->id) {
+        if ($user->getAuthIdentifier() === $target->getAuthIdentifier()) {
             return false;
         }
 
-        return ! ($target->isSuperAdmin() && ! $user->isSuperAdmin());
+        return ! (Actor::isSuperAdmin($target) && ! Actor::isSuperAdmin($user));
     }
 
     /**
@@ -63,10 +65,10 @@ class UserPolicy
      * Roles are database rows created at runtime, so this takes a role name
      * rather than an enum case.
      */
-    public function assignRole(User $user, string $role): bool
+    public function assignRole(Authenticatable $user, string $role): bool
     {
         if ($role === User::superAdminRole()) {
-            return $user->isSuperAdmin();
+            return Actor::isSuperAdmin($user);
         }
 
         return $user->can('update-users') || $user->can('create-users');

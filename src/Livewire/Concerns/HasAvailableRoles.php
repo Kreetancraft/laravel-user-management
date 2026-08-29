@@ -4,6 +4,7 @@ namespace Kreetancraft\UserManagement\Livewire\Concerns;
 
 use Illuminate\Support\Collection;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Support\Actor;
 use Spatie\Permission\Models\Role;
 
 trait HasAvailableRoles
@@ -19,7 +20,7 @@ trait HasAvailableRoles
         // query for the whole list instead of one per row.
         $query = Role::query()->withCount('permissions')->orderBy('name');
 
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! Actor::isSuperAdmin(auth()->user())) {
             $query->where('name', '!=', User::superAdminRole());
         }
 

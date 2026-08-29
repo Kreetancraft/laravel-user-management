@@ -152,6 +152,16 @@ class UserManagementServiceProvider extends ServiceProvider
     {
         Gate::policy(User::class, UserPolicy::class);
 
+        // An app is free to keep its own App\Models\User rather than extend ours.
+        // The Gate resolves a policy by the argument's concrete class, so without
+        // this a check against that model would find no policy at all and fall
+        // through to a bare deny.
+        $configured = config('auth.providers.users.model');
+
+        if (is_string($configured) && $configured !== '' && $configured !== User::class) {
+            Gate::policy($configured, UserPolicy::class);
+        }
+
         // The one component a host drops into a page of its own. The screens
         // are routed by class and need no alias; this is not routed at all.
         Livewire::component('user-management.avatar', AvatarPicker::class);
