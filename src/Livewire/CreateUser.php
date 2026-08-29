@@ -8,6 +8,8 @@ use Kreetancraft\UserManagement\Data\StoreUserData;
 use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Livewire\Concerns\HasAvailableRoles;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Support\Avatar;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use SanderMuller\FluentValidation\FluentRule as Rule;
@@ -26,6 +28,23 @@ class CreateUser extends Component
      * @var array<int, string>
      */
     public array $selectedRoles = [];
+
+    /**
+     * The chosen avatar, held until save.
+     *
+     * @var array<int, array{id: int|string, url: ?string, name: ?string}>
+     */
+    public array $avatarMedia = [];
+
+    #[On('media-picked')]
+    public function onMediaPicked(array $ids, string $group, array $items = []): void
+    {
+        if ($group !== 'user-avatar') {
+            return;
+        }
+
+        $this->avatarMedia = $items;
+    }
 
     public function mount(): void
     {
@@ -61,12 +80,18 @@ class CreateUser extends Component
             $this->authorize('assignRole', [User::class, $roleName]);
         }
 
-        CreateUserAction::run(new StoreUserData(
+        $user = CreateUserAction::run(new StoreUserData(
             name: $validated['name'],
             email: $validated['email'],
             roles: $validated['selectedRoles'] ?? [],
             is_active: $validated['is_active'],
         ));
+
+        // Attachments are polymorphic on the user's key, so this can only
+        // happen once the row exists.
+        if ($user instanceof User) {
+            Avatar::sync($user, array_map(fn ($m) => $m['id'], $this->avatarMedia));
+        }
 
         Flux::toast(variant: 'success', text: __('Invitation sent to :email.', ['email' => $validated['email']]));
 

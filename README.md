@@ -175,6 +175,34 @@ The contributing package keeps working unchanged when this one is not installed.
 | `icon` | Optional, a Flux/Heroicon name. Defaults to `square-2-stack`. |
 | `sort` | Optional, defaults to 50. This package uses 10 (Users) and 20 (Roles). |
 
+### Avatars
+
+This package ships no image handling. Point it at one that does and an avatar field appears on
+the user forms:
+
+```php
+// config/user-management.php
+'avatar_resolver'   => \Kreetancraft\Media\Support\MediaAvatarResolver::class,
+'media_picker_view' => 'media::picker-field',
+```
+
+Both halves are needed — one to store the avatar, one to choose it. With either missing the
+field renders nothing and the forms are exactly as they were, rather than showing a control with
+nothing behind it.
+
+**On your own profile page**, one line:
+
+```blade
+<x-user-management::avatar-field :user="$user" />
+```
+
+The package ships no profile screen on purpose — yours is already yours. On a Livewire form,
+bind it to a property so an unsaved choice survives until save:
+
+```blade
+<x-user-management::avatar-field :items="$avatarMedia" />
+```
+
 ## Configuration
 
 `config/user-management.php`:

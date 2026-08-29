@@ -50,6 +50,21 @@ return [
     'avatar_resolver' => null,
 
     /*
+    | The view rendered to pick an avatar, given $items (already resolved),
+    | $group and $multiple. Install kreetancraft/laravel-media-manager and point
+    | this at the field it ships:
+    |
+    |     'media_picker_view' => 'media::picker-field',
+    |
+    | Null hides the avatar field: the user forms render and save exactly as
+    | they did, rather than showing a control with nothing behind it.
+    */
+    'media_picker_view' => null,
+
+    // The media collection an avatar is stored in.
+    'avatar_collection' => 'avatar',
+
+    /*
     |--------------------------------------------------------------------------
     | Features
     |--------------------------------------------------------------------------

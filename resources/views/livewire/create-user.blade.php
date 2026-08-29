@@ -47,6 +47,13 @@
                     />
                 </x-user-management::form-section>
 
+                {{-- Renders nothing unless an avatar resolver and a picker view
+                     are both configured, so a form on an install without a
+                     media package is exactly as it was. --}}
+                <x-user-management::form-section :title="__('Avatar')">
+                    <x-user-management::avatar-field :items="$avatarMedia" :label="null" />
+                </x-user-management::form-section>
+
                 <x-user-management::form-section :title="__('Roles')">
                     @if ($roles->isEmpty())
                         <flux:callout variant="warning" icon="exclamation-triangle">

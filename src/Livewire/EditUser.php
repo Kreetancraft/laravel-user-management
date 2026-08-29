@@ -8,6 +8,8 @@ use Kreetancraft\UserManagement\Data\UpdateUserData;
 use Kreetancraft\UserManagement\Layout;
 use Kreetancraft\UserManagement\Livewire\Concerns\HasAvailableRoles;
 use Kreetancraft\UserManagement\Models\User;
+use Kreetancraft\UserManagement\Support\Avatar;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use SanderMuller\FluentValidation\FluentRule as Rule;
@@ -33,6 +35,23 @@ class EditUser extends Component
      */
     public array $selectedRoles = [];
 
+    /**
+     * The chosen avatar, held until save.
+     *
+     * @var array<int, array{id: int|string, url: ?string, name: ?string}>
+     */
+    public array $avatarMedia = [];
+
+    #[On('media-picked')]
+    public function onMediaPicked(array $ids, string $group, array $items = []): void
+    {
+        if ($group !== 'user-avatar') {
+            return;
+        }
+
+        $this->avatarMedia = $items;
+    }
+
     public function mount(User $user): void
     {
         $this->authorize('update', $user);
@@ -43,6 +62,7 @@ class EditUser extends Component
         $this->is_active = $user->is_active;
         $this->enforce_2fa = $user->enforce_2fa;
         $this->selectedRoles = $user->roles->pluck('name')->toArray();
+        $this->avatarMedia = Avatar::list($user);
     }
 
     /**
@@ -96,6 +116,10 @@ class EditUser extends Component
             'enforce_2fa' => $validated['enforce_2fa'] ?? false,
             'roles' => $roles,
         ]));
+
+        // The avatar lives in a media package, not in this one's tables, so it
+        // is stored through the configured resolver rather than the action.
+        Avatar::sync($this->user, array_map(fn ($m) => $m['id'], $this->avatarMedia));
 
         Flux::toast(variant: 'success', text: __('User updated successfully.'));
 
