@@ -63,7 +63,7 @@ class Navigation
     /**
      * Every item the current user may see, in display order.
      *
-     * @return list<array{label: string, icon: string, href: string, active: bool}>
+     * @return list<array{label: string, icon: string, href: string, active: bool, sort: int, group: ?string}>
      */
     public function items(): array
     {
@@ -82,6 +82,40 @@ class Navigation
         usort($visible, fn (array $a, array $b) => [$a['sort'], $a['label']] <=> [$b['sort'], $b['label']]);
 
         return $visible;
+    }
+
+    /**
+     * The same items, arranged into the sections the sidebar renders.
+     *
+     * A package with one screen contributes a loose item and it sits at the top
+     * level; a package with six contributes them under a `group` and they get a
+     * heading. That decision belongs to the package that owns the screens, not
+     * to whoever renders the sidebar.
+     *
+     * Ungrouped items come first, under an empty key. Each group takes the
+     * position of its earliest item, so a package cannot land its heading
+     * halfway up the sidebar by giving one link a low sort.
+     *
+     * @return array<string, list<array<string, mixed>>>
+     */
+    public function grouped(): array
+    {
+        $groups = [];
+
+        foreach ($this->items() as $item) {
+            $groups[(string) ($item['group'] ?? '')][] = $item;
+        }
+
+        uksort($groups, function (string $a, string $b) use ($groups): int {
+            // Loose items always lead, whatever they sort as.
+            if ($a === '' || $b === '') {
+                return $a === '' ? -1 : 1;
+            }
+
+            return [$groups[$a][0]['sort'], $a] <=> [$groups[$b][0]['sort'], $b];
+        });
+
+        return $groups;
     }
 
     /**
@@ -142,6 +176,7 @@ class Navigation
             'href' => route($route, $item['parameters'] ?? []),
             'active' => request()->routeIs($route, $route.'.*'),
             'sort' => (int) ($item['sort'] ?? 50),
+            'group' => isset($item['group']) ? (string) $item['group'] : null,
         ];
     }
 

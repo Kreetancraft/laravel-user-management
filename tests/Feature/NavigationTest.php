@@ -178,3 +178,47 @@ test('an item carries an href and an active flag ready for rendering', function 
         ->and(nav()->items()[0]['href'])->toContain('/widgets')
         ->and(nav()->items()[0]['active'])->toBeFalse();
 });
+
+test('items carrying a group are rendered under a heading', function () {
+    fakeRoute('admin.widgets');
+    fakeRoute('admin.gadgets', '/gadgets');
+
+    app()->bind('widgets.nav', fn () => [
+        ['label' => 'Widgets', 'route' => 'admin.widgets', 'group' => 'Acme', 'sort' => 40],
+        ['label' => 'Gadgets', 'route' => 'admin.gadgets', 'group' => 'Acme', 'sort' => 41],
+    ]);
+    app()->tag('widgets.nav', Navigation::TAG);
+
+    $sections = nav()->grouped();
+
+    expect($sections)->toHaveKey('Acme')
+        ->and(collect($sections['Acme'])->pluck('label'))->toContain('Widgets')->toContain('Gadgets');
+});
+
+test('loose items lead, whatever they sort as', function () {
+    // A package that groups six screens must not be able to push the host's own
+    // dashboard link below its heading by sorting one link low.
+    fakeRoute('admin.widgets');
+    fakeRoute('admin.gadgets', '/gadgets');
+
+    nav()->add(['label' => 'Loose', 'route' => 'admin.gadgets', 'sort' => 99]);
+
+    app()->bind('widgets.nav', fn () => [
+        ['label' => 'Grouped', 'route' => 'admin.widgets', 'group' => 'Acme', 'sort' => 1],
+    ]);
+    app()->tag('widgets.nav', Navigation::TAG);
+
+    expect(array_key_first(nav()->grouped()))->toBe('');
+});
+
+test('a group takes the position of its earliest item', function () {
+    fakeRoute('admin.widgets');
+    fakeRoute('admin.gadgets', '/gadgets');
+
+    app()->bind('a.nav', fn () => [['label' => 'Late', 'route' => 'admin.widgets', 'group' => 'Zulu', 'sort' => 80]]);
+    app()->bind('b.nav', fn () => [['label' => 'Early', 'route' => 'admin.gadgets', 'group' => 'Alpha', 'sort' => 10]]);
+    app()->tag('a.nav', Navigation::TAG);
+    app()->tag('b.nav', Navigation::TAG);
+
+    expect(array_keys(nav()->grouped()))->toBe(['Alpha', 'Zulu']);
+});
