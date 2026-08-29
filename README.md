@@ -211,6 +211,20 @@ survives until submit:
 <x-user-management::avatar-field :items="$avatarMedia" />
 ```
 
+### Why is there no avatar field?
+
+The field renders nothing unless several separate things are true, and every one fails the same
+way: a form with no avatar section and no error. That is correct on an install with no media
+package, and indistinguishable from a misconfiguration. Ask:
+
+```bash
+php artisan user-management:avatar-doctor
+```
+
+It checks the resolver, whether its class is installed, whether that resolver can *write* and not
+only read, the picker view, and whether a published copy of the user forms is shadowing the
+package's — and names the first thing that is false.
+
 ## Configuration
 
 `config/user-management.php`:

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Kreetancraft\UserManagement\Console\AvatarDoctorCommand;
 use Kreetancraft\UserManagement\Console\InstallCommand;
 use Kreetancraft\UserManagement\Console\SuperAdminCommand;
 use Kreetancraft\UserManagement\Console\SyncPermissionsCommand;
@@ -209,6 +210,7 @@ class UserManagementServiceProvider extends ServiceProvider
             $this->commands([
                 SuperAdminCommand::class,
                 SyncPermissionsCommand::class,
+                AvatarDoctorCommand::class,
                 InstallCommand::class,
             ]);
         }
