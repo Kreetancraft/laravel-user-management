@@ -61,6 +61,19 @@ return [
     */
     'media_picker_view' => null,
 
+    /*
+    | The control on a person's own profile page. An uploader rather than the
+    | library chooser: someone setting their own picture should not be shown
+    | everyone else's files, nor need a permission over the media library to do
+    | it. With kreetancraft/laravel-media-manager 0.9.0 or later:
+    |
+    |     'avatar_uploader' => 'media.avatar-uploader',
+    |
+    | Null falls back to media_picker_view, so an install that only has the
+    | chooser still works.
+    */
+    'avatar_uploader' => null,
+
     // The media collection an avatar is stored in.
     'avatar_collection' => 'avatar',
 

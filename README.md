@@ -202,6 +202,16 @@ Dropping the Blade field there instead would render a picker that quietly did no
 relies on a surrounding component to hear `media-picked`, which the user forms provide and a
 profile page does not.
 
+**On a profile page, prefer the uploader.** The chooser opens the whole media library and needs a
+permission over it; someone setting their own picture needs neither:
+
+```php
+// config/user-management.php
+'avatar_uploader' => 'media.avatar-uploader',
+```
+
+The profile component then uploads, while the admin user forms keep the chooser.
+
 The package ships no profile screen on purpose — yours is already yours.
 
 **Inside a Livewire form of your own**, use the Blade field and bind it, so an unsaved choice

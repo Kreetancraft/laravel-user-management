@@ -104,6 +104,17 @@ class AvatarPicker extends Component
     }
 
     /**
+     * The user this picker is for, for the view.
+     *
+     * Public because the uploader component needs the model handed to it, and
+     * the view is where that happens.
+     */
+    public function subject(): ?Model
+    {
+        return $this->user();
+    }
+
+    /**
      * Resolved fresh rather than held: this package does not own the user
      * class, and a model on a public property has to survive hydration.
      */

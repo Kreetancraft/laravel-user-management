@@ -78,6 +78,26 @@ class Avatar
         return is_string($view) && $view !== '' ? $view : null;
     }
 
+    /**
+     * The Livewire component that uploads without browsing, when one is
+     * configured. Null means fall back to the library chooser.
+     */
+    public static function uploader(): ?string
+    {
+        $component = config('user-management.avatar_uploader');
+
+        return is_string($component) && $component !== '' ? $component : null;
+    }
+
+    /**
+     * The collection an avatar is stored in. Public so the uploader component
+     * can be handed the same one this package reads.
+     */
+    public static function collectionName(): string
+    {
+        return self::collection();
+    }
+
     private static function collection(): string
     {
         return (string) config('user-management.avatar_collection', 'avatar');
