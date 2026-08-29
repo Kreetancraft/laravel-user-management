@@ -188,7 +188,8 @@ the user forms:
 
 Both halves are needed — one to store the avatar, one to choose it. With either missing the
 field renders nothing and the forms are exactly as they were, rather than showing a control with
-nothing behind it.
+nothing behind it. If you expected a field and there is none,
+`php artisan user-management:avatar-doctor` names the reason.
 
 **On a page with no form of its own** — a profile page, say — use the Livewire component. It
 listens for the pick and saves for itself:
@@ -221,19 +222,27 @@ survives until submit:
 <x-user-management::avatar-field :items="$avatarMedia" />
 ```
 
-### Why is there no avatar field?
+### When something does not appear
 
-The field renders nothing unless several separate things are true, and every one fails the same
-way: a form with no avatar section and no error. That is correct on an install with no media
-package, and indistinguishable from a misconfiguration. Ask:
+An avatar field that is missing, a sidebar that will not group, a picker that opens the library
+when you asked for an uploader — these all fail the same way: nothing renders, and there is no
+error. That is correct behaviour on an install without the optional pieces, and
+indistinguishable from a misconfiguration. Ask:
 
 ```bash
 php artisan user-management:avatar-doctor
 ```
 
-It checks the resolver, whether its class is installed, whether that resolver can *write* and not
-only read, the picker view, and whether a published copy of the user forms is shadowing the
-package's — and names the first thing that is false.
+It prints the installed version of this package and of laravel-media-manager, then checks the
+resolver, whether its class is installed, whether that resolver can *write* and not only read,
+the picker view, whether an uploader is configured and registered, and whether a published copy
+of the user forms or the profile picker is shadowing the package's.
+
+**Two things account for most of it.** These packages wire together through config values rather
+than Composer constraints — deliberate, so neither requires the other — and nothing stops one
+being older than the other. And **a published view wins over the package's**, so a copy taken
+before a feature existed keeps rendering the old way after an upgrade. Both are silent; the
+command makes them visible.
 
 ## Configuration
 
@@ -281,8 +290,16 @@ Every view, layout and route name is overridable.
   verification, with dedicated rate limiters for login / two-factor / passkeys
 - **Login history** — IP, user agent, derived browser and platform, optional GeoIP country
 - **Impersonation** — super admin only, double-gated
+- **Avatars** — optional, through a resolver you name; the package itself ships no image handling
+- **Sidebar** — one include renders every admin link, this package's and any other package's,
+  grouped under headings and filtered by policy
 
 ## Commands
+
+```bash
+php artisan user-management:install
+```
+Publishes the config and migrations, and injects `<x-user-management::nav />` into your sidebar.
 
 ```bash
 php artisan user-management:super-admin
@@ -292,8 +309,20 @@ Creates or promotes a super admin. Prohibited in production.
 ```bash
 php artisan user-management:sync-permissions
 ```
-Scans the configured policy paths and upserts a permission per policy method. Idempotent — safe
-to run on every deploy.
+Generates a permission per policy method and upserts them. Idempotent — safe on every deploy.
+
+Policies are found two ways: everything registered through `Gate::policy()`, which is what makes
+a policy shipped *inside* another package discoverable at all, and any policy file under
+`policies.paths`. A package opts in by declaring `PERMISSION_SUBJECT` on its policy; policies in
+your own namespaces are always included. Unrelated dependencies are left alone.
+
+Add `--dry-run` to see what would change, or `--fresh` to remove permissions no longer
+discovered (protected and custom ones are never deleted).
+
+```bash
+php artisan user-management:avatar-doctor
+```
+Says why the avatar field is not rendering. See below.
 
 ## Architecture
 
