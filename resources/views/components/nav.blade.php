@@ -21,6 +21,15 @@
     makes Livewire's compiled wire-keys emit an unbalanced endif. Livewire 4
     keys loops itself (smart_wire_keys), and this list is static per request.
 --}}
+@php
+    // Resolved here when nothing hands it in. This view is reached two ways —
+    // through View\Components\Nav, and as a plain anonymous component when a
+    // published copy is rendered directly — and 0.11.0 shipped assuming only
+    // the first, which meant an undefined $sections and a 500 on every page
+    // with a sidebar. Depending on the caller for data was the mistake.
+    $sections ??= app(\Kreetancraft\UserManagement\Navigation::class)->grouped();
+@endphp
+
 @foreach ($sections as $heading => $sectionItems)
     @if ($heading === '')
         @foreach ($sectionItems as $item)
