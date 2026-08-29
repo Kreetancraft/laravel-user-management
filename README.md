@@ -190,14 +190,22 @@ Both halves are needed — one to store the avatar, one to choose it. With eithe
 field renders nothing and the forms are exactly as they were, rather than showing a control with
 nothing behind it.
 
-**On your own profile page**, one line:
+**On a page with no form of its own** — a profile page, say — use the Livewire component. It
+listens for the pick and saves for itself:
 
 ```blade
-<x-user-management::avatar-field :user="$user" />
+<livewire:user-management.avatar />                        {{-- the signed-in user --}}
+<livewire:user-management.avatar :user="$someone" />       {{-- someone else; needs update-users --}}
 ```
 
-The package ships no profile screen on purpose — yours is already yours. On a Livewire form,
-bind it to a property so an unsaved choice survives until save:
+Dropping the Blade field there instead would render a picker that quietly did nothing: the field
+relies on a surrounding component to hear `media-picked`, which the user forms provide and a
+profile page does not.
+
+The package ships no profile screen on purpose — yours is already yours.
+
+**Inside a Livewire form of your own**, use the Blade field and bind it, so an unsaved choice
+survives until submit:
 
 ```blade
 <x-user-management::avatar-field :items="$avatarMedia" />

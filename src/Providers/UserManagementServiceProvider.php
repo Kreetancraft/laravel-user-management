@@ -15,12 +15,14 @@ use Kreetancraft\UserManagement\Contracts\RoleContract;
 use Kreetancraft\UserManagement\Contracts\UserContract;
 use Kreetancraft\UserManagement\Http\Middleware\EnsureTwoFactorEnforced;
 use Kreetancraft\UserManagement\Http\Middleware\EnsureUserIsActive;
+use Kreetancraft\UserManagement\Livewire\AvatarPicker;
 use Kreetancraft\UserManagement\Models\User;
 use Kreetancraft\UserManagement\Navigation;
 use Kreetancraft\UserManagement\Observers\UserObserver;
 use Kreetancraft\UserManagement\Policies\UserPolicy;
 use Kreetancraft\UserManagement\Repositories\RoleRepository;
 use Kreetancraft\UserManagement\Repositories\UserRepository;
+use Livewire\Livewire;
 
 class UserManagementServiceProvider extends ServiceProvider
 {
@@ -148,6 +150,10 @@ class UserManagementServiceProvider extends ServiceProvider
     private function registerPolicies(): void
     {
         Gate::policy(User::class, UserPolicy::class);
+
+        // The one component a host drops into a page of its own. The screens
+        // are routed by class and need no alias; this is not routed at all.
+        Livewire::component('user-management.avatar', AvatarPicker::class);
     }
 
     /**

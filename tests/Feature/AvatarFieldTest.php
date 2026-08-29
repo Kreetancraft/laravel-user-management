@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Kreetancraft\UserManagement\Livewire\AvatarPicker;
 use Kreetancraft\UserManagement\Livewire\CreateUser;
 use Kreetancraft\UserManagement\Livewire\EditUser;
 use Kreetancraft\UserManagement\Models\User;
@@ -149,4 +150,51 @@ it('lets the user forms save normally with the seam off', function (): void {
         ->assertHasNoErrors();
 
     expect($user->fresh()->name)->toBe('Renamed');
+});
+
+it('saves on pick from a page with no form of its own', function (): void {
+    // A profile page has a form about name and email and nothing that knows
+    // about images. Dropping the Blade field there would show a picker that
+    // quietly did nothing, so this component listens and saves for itself.
+    withAvatarSeam();
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(AvatarPicker::class)
+        ->call('onMediaPicked', [5], 'user-avatar-'.$user->id, [['id' => 5, 'url' => '/stub/5.jpg', 'name' => 'a.jpg']]);
+
+    expect($user->fresh()->avatarUrl())->toBe('/stub/5.jpg');
+});
+
+it('defaults to the signed-in user', function (): void {
+    withAvatarSeam();
+    $user = User::factory()->create();
+    Avatar::sync($user, [6]);
+    $this->actingAs($user);
+
+    Livewire::test(AvatarPicker::class)
+        ->assertSet('items', [['id' => 6, 'url' => '/stub/6.jpg', 'name' => 'a.jpg']]);
+});
+
+it('scopes its group to the user, so two on a page cannot collide', function (): void {
+    withAvatarSeam();
+    $mine = User::factory()->create();
+    $theirs = User::factory()->create();
+    $this->actingAs($mine);
+
+    $component = Livewire::test(AvatarPicker::class)->instance();
+
+    expect($component->group())->toBe('user-avatar-'.$mine->id)
+        ->and($component->group())->not->toBe('user-avatar-'.$theirs->id);
+});
+
+it('needs permission to change someone else\'s avatar', function (): void {
+    withAvatarSeam();
+    $someoneElse = User::factory()->create();
+
+    // Signed in as a user with no update-users permission.
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test(AvatarPicker::class, ['user' => $someoneElse])
+        ->assertForbidden();
 });
