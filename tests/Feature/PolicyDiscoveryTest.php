@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Gate;
+use Kreetancraft\UserManagement\Tests\Fixtures\Models\Doohickey;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\Gadget;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\ThirdPartyThing;
 use Kreetancraft\UserManagement\Tests\Fixtures\Models\Widget;
+use Kreetancraft\UserManagement\Tests\Fixtures\Policies\DoohickeyPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\GadgetPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\ThirdPartyPolicy;
 use Kreetancraft\UserManagement\Tests\Fixtures\Policies\WidgetPolicy;
@@ -128,4 +130,17 @@ test('a policy from an unrelated dependency is left alone', function () {
     expect(Permission::pluck('name')->all())
         ->not->toContain('view-third-party-things')
         ->not->toContain('restore-third-party-things');
+});
+
+test('a policy may declare its own plural when deriving one reads wrong', function () {
+    // SEO is a mass noun: `view-seo` is the phrase, `view-seos` is not. Without
+    // this the only options were an awkward permission name or an awkward
+    // subject, and both leak into every app that installs the package.
+    Gate::policy(Doohickey::class, DoohickeyPolicy::class);
+
+    $this->artisan('user-management:sync-permissions')->assertSuccessful();
+
+    expect(Permission::pluck('name')->all())
+        ->toContain('view-kit')
+        ->not->toContain('view-kits');
 });

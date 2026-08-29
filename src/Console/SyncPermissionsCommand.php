@@ -157,7 +157,7 @@ class SyncPermissionsCommand extends Command
 
         foreach ($methods as $method) {
             if ($reflection->hasMethod($method) && $reflection->getMethod($method)->isPublic()) {
-                $names[] = $this->permissionName($method, $subject);
+                $names[] = $this->permissionName($method, $subject, $policy);
             }
         }
 
@@ -196,7 +196,27 @@ class SyncPermissionsCommand extends Command
         return Str::of(class_basename($modelOrName))->kebab()->toString();
     }
 
-    private function permissionName(string $method, string $subject): string
+    /**
+     * The plural of a subject.
+     *
+     * Derived by default, because that is right almost always: user -> users.
+     * A policy may declare PERMISSION_SUBJECT_PLURAL when it is not — SEO is a
+     * mass noun, and `view-seos` is not a phrase anyone would write.
+     */
+    private function pluralFor(string $subject, ?string $policy): string
+    {
+        if ($policy !== null && defined($policy.'::PERMISSION_SUBJECT_PLURAL')) {
+            $plural = (string) constant($policy.'::PERMISSION_SUBJECT_PLURAL');
+
+            return (string) config('user-management.permissions.case', 'kebab') === 'kebab'
+                ? Str::kebab($plural)
+                : Str::snake($plural);
+        }
+
+        return Str::plural($subject);
+    }
+
+    private function permissionName(string $method, string $subject, ?string $policy = null): string
     {
         $separator = (string) config('user-management.permissions.separator', '-');
         $case = (string) config('user-management.permissions.case', 'kebab');
@@ -211,7 +231,7 @@ class SyncPermissionsCommand extends Command
             default => $action,
         };
 
-        return $action.$separator.Str::plural($subject);
+        return $action.$separator.$this->pluralFor($subject, $policy);
     }
 
     /**
