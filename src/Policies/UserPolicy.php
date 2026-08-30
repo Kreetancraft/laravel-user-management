@@ -64,13 +64,50 @@ class UserPolicy
      *
      * Roles are database rows created at runtime, so this takes a role name
      * rather than an enum case.
+     *
+     * A delegated administrator may only assign roles whose permissions are a
+     * subset of their own. This prevents privilege escalation: you cannot grant
+     * what you do not have.
      */
     public function assignRole(Authenticatable $user, string $role): bool
     {
+        // Super-admins bypass all checks via Gate::before in the service provider,
+        // but we explicitly allow super-admin role assignment here for clarity.
         if ($role === User::superAdminRole()) {
             return Actor::isSuperAdmin($user);
         }
 
-        return $user->can('update-users') || $user->can('create-users');
+        // User must have basic user-management permission
+        if (! $user->can('update-users') && ! $user->can('create-users')) {
+            return false;
+        }
+
+        // Super-admins can assign any non-super-admin role
+        if (Actor::isSuperAdmin($user)) {
+            return true;
+        }
+
+        // Non-super-admins can only assign roles whose permissions they possess.
+        // Load the role and check that every permission it carries is one the
+        // actor already has. This prevents a delegated administrator from granting
+        // manage-roles, delete-users, or other administrative permissions they lack.
+        $roleModel = \Spatie\Permission\Models\Role::findByName($role, 'web');
+        
+        // Get all permission names from the role
+        $rolePermissions = $roleModel->permissions->pluck('name')->all();
+        
+        // If the role has no permissions, it's safe to assign
+        if (empty($rolePermissions)) {
+            return true;
+        }
+        
+        // Check if the user has all permissions that the role carries
+        foreach ($rolePermissions as $permission) {
+            if (! $user->can($permission)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
